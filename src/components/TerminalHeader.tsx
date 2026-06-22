@@ -2,9 +2,11 @@ import React, { useRef } from 'react';
 import { Activity, Download, Eye, EyeOff, FolderDown, FolderUp, HelpCircle, Music, BarChart3 } from 'lucide-react';
 import { useAeterContext } from '../context/AeterContext';
 import * as htmlToImage from 'html-to-image';
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeFile } from '@tauri-apps/plugin-fs';
 
 export const TerminalHeader: React.FC<{ containerRef: React.RefObject<HTMLDivElement | null> }> = ({ containerRef }) => {
-  const { showBioMonitor, setShowBioMonitor, showResources, setShowResources, exportData, importData, setShowTutorial, appMode, setAppMode } = useAeterContext();
+  const { showBioMonitor, setShowBioMonitor, showResources, setShowResources, exportData, importData, setShowTutorial, appMode, setAppMode, setIsPrinting } = useAeterContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,22 +17,42 @@ export const TerminalHeader: React.FC<{ containerRef: React.RefObject<HTMLDivEle
 
   const handleDownload = async () => {
     if (!containerRef.current) return;
+    setIsPrinting(true);
+    
     try {
-      const dataUrl = await htmlToImage.toPng(containerRef.current, {
+      // 1. Generate the image as a blob/buffer
+      const blob = await htmlToImage.toBlob(containerRef.current, {
         backgroundColor: '#0a0a12',
         pixelRatio: 2,
         style: { transform: 'scale(1)', transformOrigin: 'top left', animation: 'none !important' },
         filter: (node) => {
-          const exclusionClasses = ['capture-overlay-ui', 'capture-selection-ui'];
+          const exclusionClasses = ['capture-overlay-ui', 'capture-selection-ui', 'pixel-tooltip'];
           return !exclusionClasses.some(cls => (node as HTMLElement).classList?.contains(cls));
         }
       });
-      const link = document.createElement('a');
-      link.download = `aeter_sync_report_${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
+
+      if (!blob) {
+        setIsPrinting(false);
+        return;
+      }
+
+      // 2. Open Native Save Dialog
+      const filePath = await save({
+        filters: [{ name: 'Image', extensions: ['png'] }],
+        defaultPath: `niobiologic_report_${Date.now()}.png`
+      });
+
+      if (filePath) {
+        // 3. Convert blob to Uint8Array and save
+        const arrayBuffer = await blob.arrayBuffer();
+        await writeFile(filePath, new Uint8Array(arrayBuffer));
+      }
+
     } catch (err) {
       console.error("Export failed:", err);
+    } finally {
+      // Add a slight delay so the user can see the 100% completion
+      setTimeout(() => setIsPrinting(false), 800);
     }
   };
 

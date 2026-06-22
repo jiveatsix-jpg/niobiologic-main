@@ -18,7 +18,9 @@ export const RadialAllocationMap: React.FC = () => {
           y={center} 
           textAnchor="middle" 
           dominantBaseline="middle" 
-          className="fill-[#00ffcc] font-mono text-[14px] tracking-[0.2em] animate-terminal-blink"
+          fill={uiSettings.hudColor} 
+          style={{ fontFamily: uiSettings.fontFamily }}
+          className="text-[14px] tracking-[0.2em] animate-terminal-blink"
         >
           SYNC: STABLE
         </text>
@@ -75,7 +77,7 @@ export const RadialAllocationMap: React.FC = () => {
                     className="transition-all duration-700 hover:fill-opacity-100 cursor-pointer"
                     style={{ filter: `drop-shadow(0 0 8px ${pathColor})` }}
                   >
-                    <title>{route.name} | {sec.name}: {val}%</title>
+                    <title>{route.name} | {sec.name}: {val.toFixed(2)}{uiSettings.showPercentage ? '%' : ''}</title>
                   </path>
                 );
               })}
@@ -96,7 +98,9 @@ export const RadialAllocationMap: React.FC = () => {
                 y={ly} 
                 textAnchor="middle" 
                 dominantBaseline="middle" 
-                className="fill-[#8a8a8a] font-mono text-[12px] tracking-widest font-bold"
+                fill={uiSettings.baseColor}
+                style={{ fontFamily: uiSettings.fontFamily, filter: `drop-shadow(0 0 5px ${sec.color})` }}
+                className="text-[11px] tracking-[0.2em] font-black"
               >
                 {sec.name}
               </text>

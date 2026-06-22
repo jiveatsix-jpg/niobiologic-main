@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700&family=Press+Start+2P&family=VT323&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700&family=Press+Start+2P&family=VT323&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;700&family=Chakra+Petch:wght@400;700&family=Goldman:wght@400;700&family=DotGothic16&display=swap');
 @import "tailwindcss";
 
 @keyframes flicker {
@@ -19,6 +19,15 @@
 
 .animate-flicker {
   animation: flicker 0.15s infinite;
+}
+
+.animate-scanline {
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
 }
 
 .animate-terminal-blink {
@@ -51,30 +60,44 @@ body {
   box-shadow: 
     inset 0 0 30px rgba(0, 0, 0, 0.9),
     0 0 25px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
 }
 
-.tactical-panel::before,
-.tactical-panel::after {
-  content: '';
+.crt-screen::before {
+  content: " ";
+  display: block;
   position: absolute;
-  width: 20px;
-  height: 20px;
-  background-color: #4a4a4a;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 20;
+  background-size: 100% 2px, 3px 100%;
   pointer-events: none;
-  z-index: 10;
 }
 
-.tactical-panel::before {
-  top: -4px;
-  left: -4px;
-  clip-path: polygon(0 0, 100% 0, 100% 20%, 20% 20%, 20% 100%, 0 100%);
+.crt-screen {
+  position: relative;
+  overflow: hidden;
 }
 
-.tactical-panel::after {
-  bottom: -4px;
-  right: -4px;
-  clip-path: polygon(100% 100%, 0 100%, 0 80%, 80% 80%, 80% 0, 100% 0);
+.crt-screen::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.1);
+  opacity: 0;
+  z-index: 20;
+  pointer-events: none;
+  animation: flicker 0.15s infinite;
 }
+
+
 
 .industrial-tab {
   font-size: 10px;
@@ -165,4 +188,123 @@ button:active {
 
 .bio-panel-glow {
   box-shadow: 0 0 40px rgba(0, 255, 204, 0.05);
+}
+
+[data-pattern="SOLID"]::before,
+[data-pattern="SOLID"]::after {
+  display: none !important;
+}
+
+/* HIDE SCROLLBARS GLOBALLY FOR PANELS */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* ═══ DARK STAR TEXTURES ═══ */
+
+/* Diagonal hash pattern for side panels — analog instrument feel */
+.panel-texture {
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(0, 255, 204, 0.015) 8px,
+      rgba(0, 255, 204, 0.015) 9px
+    );
+}
+
+/* Horizontal micro-scanlines for panel backgrounds */
+.panel-scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.15) 3px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Subtle edge glow for panels — like backlit instrumentation */
+.tactical-glow-left {
+  box-shadow:
+    inset -8px 0 20px -10px rgba(0, 255, 204, 0.06),
+    inset 0 0 30px rgba(0, 0, 0, 0.9);
+}
+
+.tactical-glow-right {
+  box-shadow:
+    inset 8px 0 20px -10px rgba(0, 255, 204, 0.06),
+    inset 0 0 30px rgba(0, 0, 0, 0.9);
+}
+
+/* Dot-matrix overlay for headers */
+.dot-matrix {
+  background-image: radial-gradient(
+    circle,
+    rgba(0, 255, 204, 0.04) 1px,
+    transparent 1px
+  );
+  background-size: 6px 6px;
+}
+
+/* Corner bracket decorations for tactical panels */
+.tactical-brackets::before,
+.tactical-brackets::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+
+.tactical-brackets::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid rgba(0, 255, 204, 0.3);
+  border-left: 2px solid rgba(0, 255, 204, 0.3);
+}
+
+.tactical-brackets::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid rgba(0, 255, 204, 0.3);
+  border-right: 2px solid rgba(0, 255, 204, 0.3);
+}
+
+/* ═══ VISUAL FILTERS ═══ */
+.filter-none {
+  filter: none;
+}
+
+.filter-crt {
+  filter: contrast(1.1) brightness(1.1) saturate(1.2);
+}
+
+.filter-print {
+  filter: invert(0.9) hue-rotate(180deg) contrast(1.5) brightness(1.2);
+  background-color: #ffffff !important;
+}
+
+.filter-stealth {
+  filter: grayscale(1) sepia(1) hue-rotate(320deg) saturate(3) brightness(0.8) contrast(1.2);
+}
+
+.filter-vintage {
+  filter: sepia(0.6) contrast(0.9) brightness(1.1);
+}
+
+.filter-monochrome {
+  filter: grayscale(1) sepia(1) hue-rotate(90deg) saturate(4) brightness(0.9) contrast(1.2);
 }

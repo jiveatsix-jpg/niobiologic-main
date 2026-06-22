@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { RouteData, Section, UISettings, ViewMode, TooltipInfo, AppMode, ChordSettings, StringConfig } from '../types';
 
 const INITIAL_SECTIONS: Section[] = [
-  { name: 'SEC-1', color: '#00ffcc', shadowColor: '#00ffcc', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
-  { name: 'SEC-2', color: '#00ffcc', shadowColor: '#00ffcc', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
-  { name: 'SEC-3', color: '#00ffcc', shadowColor: '#00ffcc', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
-  { name: 'SEC-4', color: '#00ffcc', shadowColor: '#00ffcc', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
-  { name: 'SEC-5', color: '#00ffcc', shadowColor: '#00ffcc', glowIntensity: 4, isAnchored: true, isMinimalShadow: false }
+  { name: 'CORTEX', color: '#00ffcc', shadowColor: '#00ffcc', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
+  { name: 'NUCLEUS', color: '#ffd700', shadowColor: '#ffd700', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
+  { name: 'STROMATA', color: '#ff0055', shadowColor: '#ff0055', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
+  { name: 'AXON', color: '#0088ff', shadowColor: '#0088ff', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
+  { name: 'SYNAPSE', color: '#8800ff', shadowColor: '#8800ff', glowIntensity: 4, isAnchored: true, isMinimalShadow: false }
 ];
 
 const INITIAL_ROUTES: RouteData[] = [
@@ -22,7 +22,23 @@ const INITIAL_UI_SETTINGS: UISettings = {
   hudColor: '#00ffcc',
   bgImage: null,
   lineWidth: 2,
-  backgroundPattern: 'STANDARD'
+  showPercentage: false,
+  scaleMode: 'DYNAMIC',
+  backgroundPattern: 'STANDARD',
+  xAxisTitle: 'TIME / SECTOR',
+  yAxisTitle: 'MAGNITUDE / VALUE',
+  showCompYAxis: false,
+  telemetryTopRightLabel: 'DATA_CONFIDENCE',
+  telemetryTopRightValue: 'LOCAL_STORAGE',
+  showTelemetryTopRight: true,
+  telemetryBottomRightLabel: 'SYNC_STATUS',
+  telemetryBottomRightValue: 'LOCAL_ONLY // NO_CLOUD',
+  showTelemetryBottomRight: true,
+  graphTitle: '',
+  graphTitleColor: '#ffffff',
+  graphTitleGlow: '#00ffcc',
+  visualFilter: 'NONE',
+  showSectionLabels: true
 };
 
 const DEFAULT_F_CHORD: ChordSettings = {
@@ -59,13 +75,14 @@ export function useAeterData() {
 
   const [uiSettings, setUiSettings] = useState<UISettings>(() => {
     const saved = localStorage.getItem('aeter_uisettings');
-    return saved ? JSON.parse(saved) : INITIAL_UI_SETTINGS;
+    return saved ? { ...INITIAL_UI_SETTINGS, ...JSON.parse(saved) } : INITIAL_UI_SETTINGS;
   });
 
   const [viewMode, setViewMode] = useState<ViewMode>('EVOLUTION');
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [showBioMonitor, setShowBioMonitor] = useState(false);
   const [showResources, setShowResources] = useState(true);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
   const [showTutorial, setShowTutorial] = useState<boolean>(() => {
     const saved = localStorage.getItem('aeter_has_seen_tutorial');
@@ -228,6 +245,73 @@ export function useAeterData() {
     reader.readAsText(file);
   };
 
+  const parseCSV = (text: string): { sections: Section[]; routes: RouteData[] } => {
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) throw new Error('CSV must have at least a header row and one data row.');
+
+    const parseRow = (line: string): string[] => {
+      const values: string[] = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQuotes = !inQuotes; continue; }
+        if (ch === ',' && !inQuotes) { values.push(current.trim()); current = ''; continue; }
+        current += ch;
+      }
+      values.push(current.trim());
+      return values;
+    };
+
+    const headers = parseRow(lines[0]);
+    const routeNames = headers.slice(1).map(h => h.toUpperCase().replace(/[^A-Z0-9_]/g, '_') || `RT-UNKNOWN`);
+    const routeColors = ['#ff0055', '#00ffcc', '#ffd700', '#ff8800', '#8800ff', '#0088ff', '#ffffff', '#ff4488', '#44ff88', '#4488ff'];
+    const newRoutes: RouteData[] = routeNames.map((name, i) => ({
+      id: `csv-${i}`,
+      name,
+      color: routeColors[i % routeColors.length],
+      data: [] as number[],
+      resourceValue: 50,
+    }));
+
+    const newSections: Section[] = [];
+    const defaultColors = ['#00ffcc', '#ffd700', '#ff0055', '#0088ff', '#8800ff'];
+
+    for (let ri = 1; ri < lines.length; ri++) {
+      const cells = parseRow(lines[ri]);
+      const secName = cells[0]?.toUpperCase() || `ROW-${ri}`;
+      newSections.push({
+        name: secName,
+        color: defaultColors[(ri - 1) % defaultColors.length],
+        shadowColor: defaultColors[(ri - 1) % defaultColors.length],
+        glowIntensity: 4,
+      });
+      for (let ci = 0; ci < newRoutes.length; ci++) {
+        const val = parseFloat(cells[ci + 1]);
+        newRoutes[ci].data.push(isNaN(val) ? 0 : val);
+      }
+    }
+
+    return { sections: newSections, routes: newRoutes };
+  };
+
+  const importCSV = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          const { sections: csvSections, routes: csvRoutes } = parseCSV(result);
+          setSections(csvSections);
+          setRoutes(csvRoutes);
+        }
+      } catch (error) {
+        alert(`CSV PARSE ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return {
     sections, setSections, addSection, removeSection, updateSection,
     routes, setRoutes, addRoute, removeRoute, updateRoute, updateDataPoint,
@@ -239,7 +323,9 @@ export function useAeterData() {
     tooltip, setTooltip,
     activeTab, setActiveTab,
     showTutorial, setShowTutorial, completeTutorial,
+    isPrinting, setIsPrinting,
     exportData, importData,
+    importCSV,
     appMode, setAppMode,
     chordSettings, setChordSettings, updateStringConfig,
   };

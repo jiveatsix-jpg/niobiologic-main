@@ -124,6 +124,25 @@ export const ControlPanel: React.FC = () => {
                 <input type="range" min="1" max="8" step="1" value={uiSettings.lineWidth} onChange={(e) => setUiSettings({ ...uiSettings, lineWidth: parseInt(e.target.value) })} className="w-full accent-[#ff0055] h-3" />
               </div>
               <div className="space-y-1 col-span-2">
+                <label className="flex items-center gap-2 cursor-pointer group/check">
+                  <div className={`w-3.5 h-3.5 border flex items-center justify-center ${uiSettings.showPercentage ? 'border-[#00ffcc] bg-[#00ffcc]' : 'border-[#4a4a4a]'}`}>
+                    {uiSettings.showPercentage && <div className="w-1.5 h-1.5 bg-[#000000]"></div>}
+                  </div>
+                  <input type="checkbox" className="hidden" checked={uiSettings.showPercentage} onChange={(e) => setUiSettings({ ...uiSettings, showPercentage: e.target.checked })} />
+                  <span className="text-[10px] font-bold text-[#8a8a8a] uppercase tracking-widest">SHOW PERCENTAGES</span>
+                </label>
+              </div>
+              <div className="space-y-1 col-span-2">
+                <label className="text-[10px] font-bold text-[#8a8a8a] flex items-center gap-2 uppercase">
+                  <Database className="w-3 h-3" /> SCALE MODE
+                </label>
+                <select value={uiSettings.scaleMode} onChange={(e) => setUiSettings({ ...uiSettings, scaleMode: e.target.value as any })} className="w-full bg-[#0a0a12] border border-[#4a4a4a] text-[#00ffcc] text-[10px] p-2 font-bold focus:outline-none">
+                  <option value="DYNAMIC">DYNAMIC (AUTO-RANGE)</option>
+                  <option value="FIXED">FIXED (0-100%)</option>
+                  <option value="DATA_ONLY">DATA ONLY (MARKERS)</option>
+                </select>
+              </div>
+              <div className="space-y-1 col-span-2">
                 <label className="text-[10px] font-bold text-[#8a8a8a] flex items-center gap-2 uppercase">
                   <Type className="w-3 h-3" /> FONT FAMILY
                 </label>
@@ -173,6 +192,7 @@ export const ControlPanel: React.FC = () => {
                 </label>
                 <select value={uiSettings.backgroundPattern} onChange={(e) => setUiSettings({ ...uiSettings, backgroundPattern: e.target.value as any })} className="w-full bg-[#0a0a12] border border-[#4a4a4a] text-[#00ffcc] text-[10px] p-2 font-bold focus:outline-none">
                   <option value="STANDARD">GRID</option>
+                  <option value="SOLID">PURE BLACK</option>
                   <option value="SCANLINES">BIO-SCAN</option>
                   <option value="RADIAL">RADIAL</option>
                   <option value="STEALTH">STEALTH</option>
@@ -189,6 +209,68 @@ export const ControlPanel: React.FC = () => {
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleBgImageChange} className="hidden" />
               </div>
+              <div className="space-y-1 col-span-2 pt-1 border-t border-[#4a4a4a]/30">
+                <label className="text-[10px] font-bold text-[#8a8a8a] flex items-center gap-2 uppercase">
+                   <Settings2 className="w-3 h-3" /> LABELS & AXES
+                </label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-[#4a4a4a] font-bold">GRAPH TITLE</span>
+                    <div className="flex gap-2">
+                      <input type="text" value={uiSettings.graphTitle || ''} onChange={(e) => setUiSettings({ ...uiSettings, graphTitle: e.target.value })} className="flex-1 bg-[#000000] border border-[#4a4a4a] text-[#ffffff] text-[9px] p-1.5 font-mono focus:outline-none focus:border-[#00ffcc]" placeholder="NIOBIOLOGIC TACTICAL OVERVIEW" />
+                      <input type="color" value={uiSettings.graphTitleColor || '#ffffff'} onChange={(e) => setUiSettings({ ...uiSettings, graphTitleColor: e.target.value })} className="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" title="Title Color" />
+                      <input type="color" value={uiSettings.graphTitleGlow || '#00ffcc'} onChange={(e) => setUiSettings({ ...uiSettings, graphTitleGlow: e.target.value })} className="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" title="Title Glow" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[8px] text-[#4a4a4a] font-bold">X-AXIS (HORIZ)</span>
+                      <input type="text" value={uiSettings.xAxisTitle || ''} onChange={(e) => setUiSettings({ ...uiSettings, xAxisTitle: e.target.value })} className="w-full bg-[#000000] border border-[#4a4a4a] text-[#ffffff] text-[9px] p-1.5 font-mono focus:outline-none focus:border-[#00ffcc]" placeholder="TIME / SECTOR" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[8px] text-[#4a4a4a] font-bold">Y-AXIS (VERT)</span>
+                      <input type="text" value={uiSettings.yAxisTitle || ''} onChange={(e) => setUiSettings({ ...uiSettings, yAxisTitle: e.target.value })} className="w-full bg-[#000000] border border-[#4a4a4a] text-[#ffffff] text-[9px] p-1.5 font-mono focus:outline-none focus:border-[#00ffcc]" placeholder="MAGNITUDE" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1 col-span-2 pt-1 border-t border-[#4a4a4a]/30">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-[#8a8a8a] flex items-center gap-2 uppercase">
+                     <Settings2 className="w-3 h-3" /> TELEMETRY
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-1 cursor-pointer group/check">
+                      <div className={`w-2.5 h-2.5 border flex items-center justify-center ${uiSettings.showTelemetryTopRight !== false ? 'border-[#00ffcc] bg-[#00ffcc]' : 'border-[#4a4a4a]'}`}></div>
+                      <input type="checkbox" className="hidden" checked={uiSettings.showTelemetryTopRight !== false} onChange={(e) => setUiSettings({ ...uiSettings, showTelemetryTopRight: e.target.checked })} />
+                      <span className="text-[8px] text-[#4a4a4a] font-bold group-hover/check:text-[#ffffff]">SHOW TR</span>
+                    </label>
+                    <label className="flex items-center gap-1 cursor-pointer group/check">
+                      <div className={`w-2.5 h-2.5 border flex items-center justify-center ${uiSettings.showTelemetryBottomRight !== false ? 'border-[#00ffcc] bg-[#00ffcc]' : 'border-[#4a4a4a]'}`}></div>
+                      <input type="checkbox" className="hidden" checked={uiSettings.showTelemetryBottomRight !== false} onChange={(e) => setUiSettings({ ...uiSettings, showTelemetryBottomRight: e.target.checked })} />
+                      <span className="text-[8px] text-[#4a4a4a] font-bold group-hover/check:text-[#ffffff]">SHOW BR</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-[#4a4a4a] font-bold">TOP RIGHT LBL</span>
+                    <input type="text" value={uiSettings.telemetryTopRightLabel || ''} onChange={(e) => setUiSettings({ ...uiSettings, telemetryTopRightLabel: e.target.value })} className="w-full bg-[#000000] border border-[#4a4a4a] text-[#ffffff] text-[9px] p-1.5 font-mono focus:outline-none focus:border-[#00ffcc]" placeholder="DATA_CONFIDENCE" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-[#4a4a4a] font-bold">TOP RIGHT VAL</span>
+                    <input type="text" value={uiSettings.telemetryTopRightValue || ''} onChange={(e) => setUiSettings({ ...uiSettings, telemetryTopRightValue: e.target.value })} className="w-full bg-[#000000] border border-[#4a4a4a] text-[#ffffff] text-[9px] p-1.5 font-mono focus:outline-none focus:border-[#00ffcc]" placeholder="LOCAL_STORAGE" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-[#4a4a4a] font-bold">BOT RIGHT LBL</span>
+                    <input type="text" value={uiSettings.telemetryBottomRightLabel || ''} onChange={(e) => setUiSettings({ ...uiSettings, telemetryBottomRightLabel: e.target.value })} className="w-full bg-[#000000] border border-[#4a4a4a] text-[#ffffff] text-[9px] p-1.5 font-mono focus:outline-none focus:border-[#00ffcc]" placeholder="SYNC_STATUS" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-[#4a4a4a] font-bold">BOT RIGHT VAL</span>
+                    <input type="text" value={uiSettings.telemetryBottomRightValue || ''} onChange={(e) => setUiSettings({ ...uiSettings, telemetryBottomRightValue: e.target.value })} className="w-full bg-[#000000] border border-[#4a4a4a] text-[#ffffff] text-[9px] p-1.5 font-mono focus:outline-none focus:border-[#00ffcc]" placeholder="LOCAL_ONLY" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -202,15 +284,25 @@ export const ControlPanel: React.FC = () => {
             </div>
             
             <div className="flex flex-col gap-2 border-b-2 border-[#4a4a4a] pb-2">
-              <div className="grid grid-cols-4 gap-1 p-1 w-full bg-[#000000]/60 border border-[#4a4a4a]/50">
+              <div className="grid grid-cols-5 gap-1 p-1 w-full bg-[#000000]/60 border border-[#4a4a4a]/50">
                 <button onClick={() => setViewMode('EVOLUTION')} className={`py-1.5 text-[10px] uppercase font-black transition-all rounded-sm ${viewMode === 'EVOLUTION' ? 'bg-[#00ffcc] text-[#000000]' : 'text-[#8a8a8a] hover:text-[#ffffff]'}`}>EVO</button>
                 <button onClick={() => setViewMode('COMPARISON')} className={`py-1.5 text-[10px] uppercase font-black transition-all rounded-sm ${viewMode === 'COMPARISON' ? 'bg-[#00ffcc] text-[#000000]' : 'text-[#8a8a8a] hover:text-[#ffffff]'}`}>COMP</button>
                 <button onClick={() => setViewMode('DISTRIBUTION')} className={`py-1.5 text-[10px] uppercase font-black transition-all rounded-sm ${viewMode === 'DISTRIBUTION' ? 'bg-[#00ffcc] text-[#000000]' : 'text-[#8a8a8a] hover:text-[#ffffff]'}`}>DIST</button>
                 <button onClick={() => setViewMode('RADAR')} className={`py-1.5 text-[10px] uppercase font-black transition-all rounded-sm ${viewMode === 'RADAR' ? 'bg-[#00ffcc] text-[#000000]' : 'text-[#8a8a8a] hover:text-[#ffffff]'}`}>RDR</button>
+                <button onClick={() => setViewMode('DATATABLE')} className={`py-1.5 text-[10px] uppercase font-black transition-all rounded-sm ${viewMode === 'DATATABLE' ? 'bg-[#00ffcc] text-[#000000]' : 'text-[#8a8a8a] hover:text-[#ffffff]'}`}>TBL</button>
               </div>
               <button onClick={addSection} className="w-full py-2 flex items-center justify-center gap-1 text-[12px] font-black text-[#00ffcc] border-2 border-[#00ffcc] border-dashed hover:bg-[#00ffcc]/10 hover:border-solid transition-all active:scale-95">
                 <Plus className="w-4 h-4" /> ADD SECTOR
               </button>
+              {viewMode === 'COMPARISON' && (
+                <label className="flex items-center gap-2 mt-1 cursor-pointer group/check">
+                  <div className={`w-3.5 h-3.5 border flex items-center justify-center ${uiSettings.showCompYAxis ? 'border-[#00ffcc] bg-[#00ffcc]' : 'border-[#4a4a4a]'}`}>
+                    {uiSettings.showCompYAxis && <div className="w-1.5 h-1.5 bg-[#000000]"></div>}
+                  </div>
+                  <input type="checkbox" className="hidden" checked={!!uiSettings.showCompYAxis} onChange={(e) => setUiSettings({ ...uiSettings, showCompYAxis: e.target.checked })} />
+                  <span className="text-[10px] font-bold text-[#8a8a8a] uppercase tracking-widest group-hover/check:text-[#ffffff]">SHOW Y-AXIS (COMP MODE)</span>
+                </label>
+              )}
             </div>
 
             <div className="flex flex-col gap-1">
@@ -296,7 +388,10 @@ export const ControlPanel: React.FC = () => {
               {sections.map((sec, i) => (
                 <div key={`${route.id}-p-${i}`} className="bg-[#0a0a12]/40 p-1.5 border border-[#4a4a4a]/30 flex flex-col justify-between">
                   <label className="text-[8px] font-bold block truncate uppercase tracking-tighter" style={{ color: sec.color }}>{sec.name}</label>
-                  <input type="number" value={route.data[i] ?? 0} onChange={(e) => updateDataPoint(route.id, i, parseInt(e.target.value) || 0)} className="w-full text-xs font-black bg-transparent border-b border-[#4a4a4a] text-[#ffffff] focus:border-[#00ffcc] focus:outline-none py-0.5" />
+                  <div className="flex items-center gap-1">
+                    <input type="number" step="0.01" value={route.data[i] ?? 0} onChange={(e) => updateDataPoint(route.id, i, parseFloat(e.target.value) || 0)} className="w-full text-xs font-black bg-transparent border-b border-[#4a4a4a] text-[#ffffff] focus:border-[#00ffcc] focus:outline-none py-0.5" />
+                    {uiSettings.showPercentage && <span className="text-[10px] text-[#00ffcc] font-bold">%</span>}
+                  </div>
                 </div>
               ))}
             </div>
