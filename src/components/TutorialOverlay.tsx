@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAeterContext } from '../context/AeterContext';
-import { ChevronRight, ChevronLeft, Target, Activity, Settings, Save, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Target, Activity, Settings, Save, BookOpen, FolderUp, X } from 'lucide-react';
 
 const TUTORIAL_STEPS = [
   {
@@ -16,16 +16,22 @@ const TUTORIAL_STEPS = [
     content: "En la barra lateral izquierda encontrarás el Panel de Control. Desde aquí puedes modificar la interfaz, gestionar las Rutas (datos) y configurar las Secciones (ejes del radar). Prueba a añadir diferentes colores y ajustar la intensidad de brillo."
   },
   {
-    title: "VISUALIZACIÓN MULTI-MODO",
-    subtitle: "ÁREA TÁCTICA CENTRAL",
-    icon: <Activity className="w-12 h-12 text-[#ffd700] mb-4" />,
-    content: "Las rutas que configures se mostrarán en el centro del terminal. Puedes cambiar entre diferentes modos de vista (Evolución, Radar, Malla de Datos) usando las pestañas del panel de control para un análisis más profundo."
+    title: "IMPORTAR DATOS",
+    subtitle: "CSV Y DATACUBE",
+    icon: <FolderUp className="w-12 h-12 text-[#ffd700] mb-4" />,
+    content: "En la barra inferior tienes botones para importar datos. Usa IMPORT CSV para cargar archivos externos (formato: primera fila con nombres de rutas, primera columna con nombres de secciones). Si el archivo tiene más de 150 puntos, el sistema aplica el algoritmo LTTB para preservar la forma visual sin saturar el gráfico. También puedes importar/exportar DATACUBE (JSON) con toda la configuración."
   },
   {
-    title: "GESTIÓN DE DATOS Y BIO-MONITOR",
+    title: "BIBLIOTECA DE GRÁFICOS",
+    subtitle: "GUARDAR Y CARGAR",
+    icon: <BookOpen className="w-12 h-12 text-[#ffd700] mb-4" />,
+    content: "En la barra superior, el botón con el icono de libro abre la Graph Library. Desde allí puedes guardar el estado actual del gráfico con un nombre personalizado, cargar gráficos guardados anteriormente o eliminarlos. Todo persiste automáticamente en tu navegador."
+  },
+  {
+    title: "PERSONALIZACIÓN Y BIO-MONITOR",
     subtitle: "SISTEMAS EXTREMOS",
-    icon: <Save className="w-12 h-12 text-[#0088ff] mb-4" />,
-    content: "En la cabecera superior tienes botones para Importar/Exportar tu configuración actual (DATACUBE) y acceder al Bio-Monitor Avanzado. Imprime tus gráficos generados para tus informes tácticos."
+    icon: <Save className="w-12 h-12 text-[#00ffcc] mb-4" />,
+    content: "El panel OPTICS (paleta) te permite ajustar colores, fuentes, escalas, filtros visuales y ocultar los nombres de secciones del eje inferior con el toggle SECTION LABELS. También puedes acceder al Bio-Monitor para un análisis detallado del sistema e imprimir el gráfico como PNG."
   }
 ];
 

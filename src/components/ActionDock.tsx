@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Download, FolderDown, FolderUp, Activity, Music, BarChart3 } from 'lucide-react';
+import { Download, FolderDown, FolderUp, Activity } from 'lucide-react';
 import { useAeterContext } from '../context/AeterContext';
 import { ViewMode } from '../types';
 import * as htmlToImage from 'html-to-image';
@@ -17,7 +17,7 @@ interface ActionDockProps {
 }
 
 export const ActionDock: React.FC<ActionDockProps> = ({ containerRef }) => {
-  const { exportData, importData, importCSV, setShowBioMonitor, appMode, setAppMode, viewMode, setViewMode } = useAeterContext();
+  const { exportData, importData, importCSV, setShowBioMonitor, viewMode, setViewMode } = useAeterContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,38 +107,22 @@ export const ActionDock: React.FC<ActionDockProps> = ({ containerRef }) => {
         </button>
       </div>
 
-      {/* Center: View Mode Selector — only in GRAPH mode */}
-      {appMode === 'GRAPH' && (
-        <div className="flex items-center gap-1 bg-[#000000]/60 border border-[#4a4a4a]/50 p-0.5">
-          {VIEW_MODES.map(mode => (
-            <button
-              key={mode.id}
-              onClick={() => setViewMode(mode.id)}
-              className={`px-3 py-1 text-[9px] uppercase font-black transition-all tracking-wider ${
-                viewMode === mode.id
-                  ? 'bg-[#00ffcc] text-[#000000] shadow-[0_0_10px_rgba(0,255,204,0.3)]'
-                  : 'text-[#8a8a8a] hover:text-[#ffffff] hover:bg-[#ffffff]/5'
-              }`}
-            >
-              {mode.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Right: Mode toggle */}
-      <button
-        onClick={() => setAppMode(appMode === 'CHORD' ? 'GRAPH' : 'CHORD')}
-        className={`px-3 py-1.5 flex items-center gap-2 text-[9px] font-bold border transition-all active:scale-95 capture-overlay-ui ${
-          appMode === 'CHORD'
-            ? 'text-[#ff0055] border-[#ff0055] hover:bg-[#ff0055]/10'
-            : 'text-[#8a8a8a] border-[#4a4a4a] hover:text-[#ff0055] hover:border-[#ff0055]'
-        }`}
-        title="Switch between Graph and Chord mode"
-      >
-        {appMode === 'CHORD' ? <BarChart3 className="w-3.5 h-3.5" /> : <Music className="w-3.5 h-3.5" />}
-        {appMode === 'CHORD' ? 'GRAPH MODE' : 'CHORD MODE'}
-      </button>
+      {/* Center: View Mode Selector */}
+      <div className="flex items-center gap-1 bg-[#000000]/60 border border-[#4a4a4a]/50 p-0.5">
+        {VIEW_MODES.map(mode => (
+          <button
+            key={mode.id}
+            onClick={() => setViewMode(mode.id)}
+            className={`px-3 py-1 text-[9px] uppercase font-black transition-all tracking-wider ${
+              viewMode === mode.id
+                ? 'bg-[#00ffcc] text-[#000000] shadow-[0_0_10px_rgba(0,255,204,0.3)]'
+                : 'text-[#8a8a8a] hover:text-[#ffffff] hover:bg-[#ffffff]/5'
+            }`}
+          >
+            {mode.label}
+          </button>
+        ))}
+      </div>
     </footer>
   );
 };

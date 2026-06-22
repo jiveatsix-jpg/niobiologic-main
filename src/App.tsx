@@ -2,16 +2,15 @@ import React, { useRef, useState } from 'react';
 import { AeterProvider, useAeterContext } from './context/AeterContext';
 import { FloatingPanel } from './components/FloatingPanel';
 import { GraphCanvas } from './components/GraphCanvas';
-import { ChordCanvas } from './components/ChordCanvas';
-import { ChordControlPanel } from './components/ChordControlPanel';
 import { DataTableView } from './components/DataTableView';
 import { BioMonitorOverlay } from './components/BioMonitorOverlay';
 import { TutorialOverlay } from './components/TutorialOverlay';
 import { ModeSelector } from './components/ModeSelector';
 import { ActionDock } from './components/ActionDock';
-import { Database, Zap, Grid3X3, Type, Palette, Activity, HelpCircle, Square } from 'lucide-react';
+import { Database, Zap, Grid3X3, Type, Palette, Activity, HelpCircle, Square, BookOpen } from 'lucide-react';
 import { StreamsContent, SectorsContent, MatrixContent, IdentityContent, OpticsContent, TelemetryContent } from './components/PanelContents';
 import { PrintOverlay } from './components/PrintOverlay';
+import { LibraryOverlay } from './components/LibraryOverlay';
 
 type PanelId = 'streams' | 'sectors' | 'matrix' | 'identity' | 'optics' | 'telemetry';
 
@@ -34,7 +33,7 @@ const CONTENT_MAP: Record<PanelId, React.FC> = {
 };
 
 const AppContent = () => {
-  const { uiSettings, appMode, viewMode, setShowTutorial, isPrinting } = useAeterContext();
+  const { uiSettings, appMode, viewMode, setShowTutorial, isPrinting, setShowLibrary } = useAeterContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const [openPanels, setOpenPanels] = useState<Set<PanelId>>(new Set());
   const [showFrame, setShowFrame] = useState(true);
@@ -69,6 +68,9 @@ const AppContent = () => {
           </button>
           <button onClick={() => setShowTutorial(true)} className="p-1.5 text-[#00ffcc] border border-[#00ffcc]/30 hover:bg-[#00ffcc]/10">
             <HelpCircle className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setShowLibrary(true)} className="p-1.5 text-[#ffd700] border border-[#ffd700]/30 hover:bg-[#ffd700]/10" title="Graph Library">
+            <BookOpen className="w-3.5 h-3.5" />
           </button>
         </div>
       </header>
@@ -110,18 +112,11 @@ const AppContent = () => {
           </div>
         )}
 
-        {/* CHORD sidebar */}
-        {appMode === 'CHORD' && (
-          <aside className="w-[280px] h-full flex-shrink-0 bg-[#000000]/80 border-r border-[#1a1a2e] overflow-y-auto no-scrollbar p-2">
-            <ChordControlPanel containerRef={containerRef} />
-          </aside>
-        )}
-
         {/* CANVAS — full area */}
         <main className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-          <div className={`relative w-full max-w-5xl ${showFrame ? 'tactical-panel p-2 bg-[#000000] shadow-[0_0_60px_rgba(0,0,0,0.9)]' : ''} ${viewMode === 'DATATABLE' || appMode === 'CHORD' ? 'h-full' : 'h-fit'}`}>
-            <div ref={containerRef} className={`w-full relative ${viewMode === 'DATATABLE' || appMode === 'CHORD' ? 'h-full' : 'h-fit'}`}>
-              {appMode === 'CHORD' ? <ChordCanvas /> : viewMode === 'DATATABLE' ? <DataTableView /> : <GraphCanvas />}
+          <div className={`relative w-full max-w-5xl ${showFrame ? 'tactical-panel p-2 bg-[#000000] shadow-[0_0_60px_rgba(0,0,0,0.9)]' : ''} ${viewMode === 'DATATABLE' ? 'h-full' : 'h-fit'}`}>
+            <div ref={containerRef} className={`w-full relative ${viewMode === 'DATATABLE' ? 'h-full' : 'h-fit'}`}>
+              {viewMode === 'DATATABLE' ? <DataTableView /> : <GraphCanvas />}
             </div>
           </div>
         </main>
@@ -144,6 +139,7 @@ const AppContent = () => {
       <BioMonitorOverlay />
       <TutorialOverlay />
       <PrintOverlay isVisible={isPrinting} />
+      <LibraryOverlay />
     </div>
   );
 };

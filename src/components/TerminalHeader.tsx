@@ -1,12 +1,12 @@
 import React, { useRef } from 'react';
-import { Activity, Download, Eye, EyeOff, FolderDown, FolderUp, HelpCircle, Music, BarChart3 } from 'lucide-react';
+import { Activity, Download, Eye, EyeOff, FolderDown, FolderUp, HelpCircle } from 'lucide-react';
 import { useAeterContext } from '../context/AeterContext';
 import * as htmlToImage from 'html-to-image';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeFile } from '@tauri-apps/plugin-fs';
 
 export const TerminalHeader: React.FC<{ containerRef: React.RefObject<HTMLDivElement | null> }> = ({ containerRef }) => {
-  const { showBioMonitor, setShowBioMonitor, showResources, setShowResources, exportData, importData, setShowTutorial, appMode, setAppMode, setIsPrinting } = useAeterContext();
+  const { showBioMonitor, setShowBioMonitor, showResources, setShowResources, exportData, importData, setShowTutorial, setIsPrinting } = useAeterContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,19 +118,6 @@ export const TerminalHeader: React.FC<{ containerRef: React.RefObject<HTMLDivEle
           HELP
         </button>
 
-        {/* Mode Toggle */}
-        <button
-          onClick={() => setAppMode(appMode === 'CHORD' ? 'GRAPH' : 'CHORD')}
-          className={`px-3 py-2 flex items-center gap-2 text-[10px] font-bold border-4 transition-all active:scale-95 capture-overlay-ui ml-2 ${
-            appMode === 'CHORD'
-              ? 'text-[#ff0055] border-[#ff0055] hover:bg-[#ff0055]/10'
-              : 'text-[#8a8a8a] border-[#4a4a4a] hover:text-[#ff0055] hover:border-[#ff0055]'
-          }`}
-          title="Switch between Graph and Chord mode"
-        >
-          {appMode === 'CHORD' ? <BarChart3 className="w-4 h-4" /> : <Music className="w-4 h-4" />}
-          {appMode === 'CHORD' ? 'GRAPH MODE' : 'CHORD MODE'}
-        </button>
       </div>
     </header>
   );

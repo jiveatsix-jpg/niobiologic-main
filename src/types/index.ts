@@ -53,27 +53,15 @@ export interface UISettings {
 
 export type ViewMode = 'EVOLUTION' | 'COMPARISON' | 'DISTRIBUTION' | 'RADAR' | 'DATATABLE';
 
-export type AppMode = 'GRAPH' | 'CHORD';
+export type AppMode = 'GRAPH';
 
-export type StringState = 'open' | 'muted' | 'played';
-
-export interface StringConfig {
-  state: StringState; // open = ○, muted = ✕, played = dot
-  fret: number;       // 0-based fret number on the fretboard (1 = first fret)
-  finger: number;     // Finger index shown in dot (1-4)
-}
-
-export interface ChordSettings {
-  chordName: string;
-  startFret: number;         // Fret number shown at top-left of diagram
-  numFrets: number;          // How many frets to render (4-7)
-  strings: StringConfig[];   // 6 strings, index 0 = low E, index 5 = high e
-  // Style
-  dotColor: string;
-  labelColor: string;
-  stringColor: string;
-  fretColor: string;
-  bgColor: string;
-  woodColor: string;
-  showFingerNumbers: boolean;
+export interface SavedGraph {
+  id: string;
+  name: string;
+  timestamp: number;
+  sections: Section[];
+  routes: RouteData[];
+  uiSettings: UISettings;
+  appMode: AppMode | null;
+  viewMode: ViewMode;
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RouteData, Section, UISettings, ViewMode, TooltipInfo, AppMode, ChordSettings, StringConfig } from '../types';
+import { RouteData, Section, UISettings, ViewMode, TooltipInfo, AppMode, SavedGraph } from '../types';
 
 const INITIAL_SECTIONS: Section[] = [
   { name: 'CORTEX', color: '#00ffcc', shadowColor: '#00ffcc', glowIntensity: 4, isAnchored: true, isMinimalShadow: false },
@@ -41,27 +41,6 @@ const INITIAL_UI_SETTINGS: UISettings = {
   showSectionLabels: true
 };
 
-const DEFAULT_F_CHORD: ChordSettings = {
-  chordName: 'F',
-  startFret: 1,
-  numFrets: 4,
-  strings: [
-    { state: 'played', fret: 1, finger: 1 }, // Low E
-    { state: 'played', fret: 1, finger: 1 }, // A
-    { state: 'played', fret: 2, finger: 2 }, // D
-    { state: 'played', fret: 3, finger: 4 }, // G
-    { state: 'played', fret: 3, finger: 3 }, // B
-    { state: 'played', fret: 1, finger: 1 }, // High e
-  ],
-  dotColor: '#00ffcc',
-  labelColor: '#000000',
-  stringColor: '#4a4a4a',
-  fretColor: '#4a4a4a',
-  bgColor: '#0a0a12',
-  woodColor: '#1a1a2e',
-  showFingerNumbers: true,
-};
-
 export function useAeterData() {
   const [sections, setSections] = useState<Section[]>(() => {
     const saved = localStorage.getItem('aeter_sections');
@@ -91,12 +70,8 @@ export function useAeterData() {
 
   const [appMode, setAppMode] = useState<AppMode | null>(() => {
     const saved = localStorage.getItem('aeter_app_mode');
+    if (saved === 'CHORD') return 'GRAPH';
     return (saved as AppMode) || null;
-  });
-
-  const [chordSettings, setChordSettings] = useState<ChordSettings>(() => {
-    const saved = localStorage.getItem('aeter_chord_settings');
-    return saved ? JSON.parse(saved) : DEFAULT_F_CHORD;
   });
 
   const completeTutorial = () => {
@@ -105,6 +80,12 @@ export function useAeterData() {
   };
 
   const [activeTab, setActiveTab] = useState<string>('GLOBAL');
+
+  const [savedGraphs, setSavedGraphs] = useState<SavedGraph[]>(() => {
+    const saved = localStorage.getItem('aeter_library');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showLibrary, setShowLibrary] = useState(false);
 
   // Persistence
   useEffect(() => {
@@ -124,8 +105,36 @@ export function useAeterData() {
   }, [appMode]);
 
   useEffect(() => {
-    localStorage.setItem('aeter_chord_settings', JSON.stringify(chordSettings));
-  }, [chordSettings]);
+    localStorage.setItem('aeter_library', JSON.stringify(savedGraphs));
+  }, [savedGraphs]);
+
+  const saveGraph = (name: string) => {
+    const graph: SavedGraph = {
+      id: Date.now().toString(),
+      name: name.toUpperCase() || `GRAPH_${savedGraphs.length + 1}`,
+      timestamp: Date.now(),
+      sections: JSON.parse(JSON.stringify(sections)),
+      routes: JSON.parse(JSON.stringify(routes)),
+      uiSettings: JSON.parse(JSON.stringify(uiSettings)),
+      appMode,
+      viewMode,
+    };
+    setSavedGraphs(prev => [graph, ...prev]);
+  };
+
+  const loadGraph = (id: string) => {
+    const graph = savedGraphs.find(g => g.id === id);
+    if (!graph) return;
+    setSections(graph.sections);
+    setRoutes(graph.routes);
+    setUiSettings(graph.uiSettings);
+    setViewMode(graph.viewMode);
+    setAppMode('GRAPH');
+  };
+
+  const deleteGraph = (id: string) => {
+    setSavedGraphs(prev => prev.filter(g => g.id !== id));
+  };
 
   // Actions
   const addRoute = () => {
@@ -202,14 +211,6 @@ export function useAeterData() {
     
     newSections[index] = updatedSec;
     setSections(newSections);
-  };
-
-  const updateStringConfig = (stringIndex: number, updates: Partial<StringConfig>) => {
-    setChordSettings(prev => {
-      const newStrings = [...prev.strings];
-      newStrings[stringIndex] = { ...newStrings[stringIndex], ...updates };
-      return { ...prev, strings: newStrings };
-    });
   };
 
   const exportData = () => {
@@ -327,6 +328,7 @@ export function useAeterData() {
     exportData, importData,
     importCSV,
     appMode, setAppMode,
-    chordSettings, setChordSettings, updateStringConfig,
+    savedGraphs, saveGraph, loadGraph, deleteGraph,
+    showLibrary, setShowLibrary,
   };
 }

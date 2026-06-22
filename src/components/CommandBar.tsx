@@ -3,11 +3,10 @@ import { Activity, HelpCircle } from 'lucide-react';
 import { useAeterContext } from '../context/AeterContext';
 
 export const CommandBar: React.FC = () => {
-  const { setShowTutorial, appMode } = useAeterContext();
+  const { setShowTutorial } = useAeterContext();
 
   return (
     <header className="w-full flex items-center justify-between tactical-panel p-2 px-6 backdrop-blur-sm border-b border-[#1a1a2e] bg-[#000000]/90 z-30 dot-matrix">
-      {/* Identity */}
       <div className="flex items-center gap-3 shrink-0">
         <Activity className="w-7 h-7 text-[#00ffcc]" />
         <div className="text-left">
@@ -16,20 +15,10 @@ export const CommandBar: React.FC = () => {
         </div>
       </div>
 
-      {/* Center status */}
-      {appMode === 'CHORD' && (
-        <div className="text-[10px] font-black text-[#ff0055] tracking-[0.3em] uppercase">
-          ♫ CHORD EDITOR
-        </div>
-      )}
+      <div className="text-[8px] font-mono text-[#4a4a4a] tracking-[0.2em]">
+        AUTH: ALPHA OPERATOR // SYSTEM_LOCKED // NIOBIOLOGIC_v3.0
+      </div>
 
-      {appMode === 'GRAPH' && (
-        <div className="text-[8px] font-mono text-[#4a4a4a] tracking-[0.2em]">
-          AUTH: ALPHA OPERATOR // SYSTEM_LOCKED // NIOBIOLOGIC_v3.0
-        </div>
-      )}
-
-      {/* Help */}
       <button
         onClick={() => setShowTutorial(true)}
         className="p-2 text-[#00ffcc] border border-[#00ffcc]/30 hover:bg-[#00ffcc]/10 transition-all active:scale-95"
