@@ -1,0 +1,16 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+.DS_Store
+*.local
+*.log
+.env*
+!.env.example
+
+# Tauri
+src-tauri/target/
+
+# Local Netlify folder
+.netlify
