@@ -4,6 +4,8 @@ export interface RouteData {
   color: string;
   data: number[];
   resourceValue: number;
+  unitSymbol?: string;
+  unitPosition?: 'prefix' | 'suffix';
 }
 
 export interface Section {
@@ -32,7 +34,6 @@ export interface UISettings {
   hudColor: string;
   bgImage: string | null;
   lineWidth: number;
-  showPercentage: boolean;
   scaleMode: 'DYNAMIC' | 'FIXED' | 'DATA_ONLY';
   backgroundPattern: 'STANDARD' | 'SCANLINES' | 'RADIAL' | 'STEALTH' | 'BLUEPRINT' | 'SOLID';
   xAxisTitle?: string;

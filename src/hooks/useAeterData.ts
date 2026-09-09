@@ -23,7 +23,6 @@ const INITIAL_UI_SETTINGS: UISettings = {
   hudColor: '#00ffcc',
   bgImage: null,
   lineWidth: 2,
-  showPercentage: false,
   scaleMode: 'DYNAMIC',
   backgroundPattern: 'STANDARD',
   xAxisTitle: 'TIME / SECTOR',

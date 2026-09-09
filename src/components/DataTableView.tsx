@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAeterContext } from '../context/AeterContext';
+import { formatValue } from '../utils/format';
 
 export const DataTableView: React.FC = () => {
   const { routes, sections, uiSettings } = useAeterContext();
@@ -32,7 +33,7 @@ export const DataTableView: React.FC = () => {
                   <tr>
                     <th className="py-4 px-4 border-b-4 border-[#4a4a4a] text-[#8a8a8a] uppercase tracking-widest text-[10px] lg:text-xs leading-loose">SECTOR</th>
                     <th className="py-4 px-4 border-b-4 border-[#4a4a4a] text-[#8a8a8a] text-right uppercase tracking-widest text-[10px] lg:text-xs leading-loose">VALUE</th>
-                    <th className="py-4 px-4 border-b-4 border-[#4a4a4a] text-[#8a8a8a] text-right uppercase tracking-widest text-[10px] lg:text-xs leading-loose">PERCENTAGE</th>
+                    <th className="py-4 px-4 border-b-4 border-[#4a4a4a] text-[#8a8a8a] text-right uppercase tracking-widest text-[10px] lg:text-xs leading-loose">{route.unitSymbol ? `FORMATTED (${route.unitSymbol})` : 'FORMATTED'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -47,7 +48,7 @@ export const DataTableView: React.FC = () => {
                           {val.toFixed(2)}
                         </td>
                         <td className="py-3 px-4 border-b-2 border-[#4a4a4a]/30 text-right text-[#ffffff]/60 group-hover:text-[#00ffcc] text-[10px] lg:text-xs leading-loose">
-                          {val.toFixed(2)}%
+                          {formatValue(val, route)}
                         </td>
                       </tr>
                     );

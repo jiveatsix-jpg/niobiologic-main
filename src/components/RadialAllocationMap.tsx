@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAeterContext } from '../context/AeterContext';
+import { formatValue } from '../utils/format';
 
 export const RadialAllocationMap: React.FC = () => {
   const { sections, routes, uiSettings } = useAeterContext();
@@ -77,7 +78,7 @@ export const RadialAllocationMap: React.FC = () => {
                     className="transition-all duration-700 hover:fill-opacity-100 cursor-pointer"
                     style={{ filter: `drop-shadow(0 0 8px ${pathColor})` }}
                   >
-                    <title>{route.name} | {sec.name}: {val.toFixed(2)}{uiSettings.showPercentage ? '%' : ''}</title>
+                    <title>{route.name} | {sec.name}: {formatValue(val, route)}</title>
                   </path>
                 );
               })}

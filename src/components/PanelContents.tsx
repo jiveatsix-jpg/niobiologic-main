@@ -101,14 +101,19 @@ export const SectorsContent: React.FC = () => {
 
 /* ═══ DATA MATRIX ═══ */
 export const MatrixContent: React.FC = () => {
-  const { routes, sections, updateDataPoint, uiSettings } = useAeterContext();
+  const { routes, sections, updateDataPoint, updateRoute, uiSettings } = useAeterContext();
   return (
     <>
       {routes.map(route => (
         <div key={`matrix-${route.id}`}>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: route.color, boxShadow: `0 0 4px ${route.color}` }} />
-            <span className="text-[9px] font-black tracking-wider" style={{ color: route.color }}>{route.name}</span>
+          <div className="flex items-center gap-1 mb-1">
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: route.color, boxShadow: `0 0 4px ${route.color}` }} />
+            <span className="text-[9px] font-black tracking-wider truncate min-w-0 flex-1" style={{ color: route.color }}>{route.name}</span>
+            <input type="text" value={route.unitSymbol || ''} onChange={e => updateRoute(route.id, { unitSymbol: e.target.value })} maxLength={3} placeholder="UNIT" className="w-8 shrink-0 bg-[#0a0a12] border border-[#4a4a4a] text-[#ffffff] text-[7px] font-mono text-center p-0.5 focus:outline-none focus:border-[#00ffcc]" title="Símbolo de unidad ($, €, %, kg...)" />
+            <select value={route.unitPosition || 'suffix'} onChange={e => updateRoute(route.id, { unitPosition: e.target.value as 'prefix' | 'suffix' })} className="w-9 shrink-0 bg-[#0a0a12] border border-[#4a4a4a] text-[#8a8a8a] text-[6px] font-mono p-0.5 focus:outline-none" title="Posición del símbolo">
+              <option value="prefix">PRE</option>
+              <option value="suffix">SUF</option>
+            </select>
           </div>
           <div className="grid grid-cols-3 gap-1">
             {sections.map((sec, i) => (
@@ -213,7 +218,6 @@ export const OpticsContent: React.FC = () => {
         </div>
       </div>
       <div className="flex flex-col gap-1 pt-1 border-t border-[#4a4a4a]/20">
-        <label className="flex items-center gap-2 cursor-pointer"><div className={`w-3 h-3 border flex items-center justify-center ${uiSettings.showPercentage ? 'border-[#00ffcc] bg-[#00ffcc]' : 'border-[#4a4a4a]'}`}>{uiSettings.showPercentage && <div className="w-1.5 h-1.5 bg-[#000000]" />}</div><input type="checkbox" className="hidden" checked={uiSettings.showPercentage} onChange={e => setUiSettings({ ...uiSettings, showPercentage: e.target.checked })} /><span className="text-[8px] font-bold text-[#8a8a8a] uppercase tracking-widest">PERCENTAGES</span></label>
         {viewMode === 'COMPARISON' && <label className="flex items-center gap-2 cursor-pointer"><div className={`w-3 h-3 border flex items-center justify-center ${uiSettings.showCompYAxis ? 'border-[#00ffcc] bg-[#00ffcc]' : 'border-[#4a4a4a]'}`}>{uiSettings.showCompYAxis && <div className="w-1.5 h-1.5 bg-[#000000]" />}</div><input type="checkbox" className="hidden" checked={!!uiSettings.showCompYAxis} onChange={e => setUiSettings({ ...uiSettings, showCompYAxis: e.target.checked })} /><span className="text-[8px] font-bold text-[#8a8a8a] uppercase tracking-widest">Y-AXIS (COMP)</span></label>}
         <label className="flex items-center gap-2 cursor-pointer"><div className={`w-3 h-3 border flex items-center justify-center ${uiSettings.showSectionLabels ? 'border-[#00ffcc] bg-[#00ffcc]' : 'border-[#4a4a4a]'}`}>{uiSettings.showSectionLabels && <div className="w-1.5 h-1.5 bg-[#000000]" />}</div><input type="checkbox" className="hidden" checked={uiSettings.showSectionLabels} onChange={e => setUiSettings({ ...uiSettings, showSectionLabels: e.target.checked })} /><span className="text-[8px] font-bold text-[#8a8a8a] uppercase tracking-widest">SECTION LABELS</span></label>
       </div>

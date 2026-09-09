@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react'
 import { useAeterContext } from '../context/AeterContext';
 import { TooltipInfo } from '../types';
 import { lttbIndices } from '../utils/lttb';
+import { formatValue } from '../utils/format';
 
 const LTTB_THRESHOLD = 150;
 
@@ -121,7 +122,7 @@ export const GraphCanvas = React.memo(() => {
       
       uniqueVals.forEach(val => {
         const y = getY(val);
-        const label = val.toFixed(2) + (uiSettings.showPercentage ? '%' : '');
+        const label = val.toFixed(2);
         ctx.textAlign = 'right';
         ctx.fillText(label, PADDING - 12, y + (uiSettings.fontSize * ELEMENT_SCALE) / 3);
         ctx.beginPath();
@@ -134,7 +135,7 @@ export const GraphCanvas = React.memo(() => {
       for (let i = 0; i <= tickCount; i++) {
         const val = minVal + (i * (maxVal - minVal) / tickCount);
         const y = getY(val);
-        const label = val.toFixed(2) + (uiSettings.showPercentage ? '%' : '');
+        const label = val.toFixed(2);
         ctx.textAlign = 'right';
         ctx.fillText(label, PADDING - 12, y + (uiSettings.fontSize * ELEMENT_SCALE) / 3);
         ctx.beginPath();
@@ -278,8 +279,9 @@ export const GraphCanvas = React.memo(() => {
       ctx.font = `bold ${scaledFont(uiSettings.fontSize)} ${uiSettings.fontFamily}`;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      const label = tooltip.val.toFixed(2) + (uiSettings.showPercentage ? '%' : '');
-      
+      const tooltipRoute = routes.find(r => r.name === tooltip.routeName);
+      const label = formatValue(tooltip.val, tooltipRoute);
+
       // Precise measurement for the box
       const labelWidth = ctx.measureText(label).width;
       const boxPaddingH = 6;
@@ -665,7 +667,7 @@ export const GraphCanvas = React.memo(() => {
         if (uiSettings.showSectionLabels) {
           ctx.fillStyle = route.color;
           ctx.font = '7px monospace';
-          const label = val.toFixed(2) + (uiSettings.showPercentage ? '%' : '');
+          const label = formatValue(val, route);
           ctx.fillText(label, x + 5, y - 5);
         }
       }
@@ -989,7 +991,7 @@ export const GraphCanvas = React.memo(() => {
             {tooltip.routeName}
           </div>
           <div className="text-[14px]">
-            {tooltip.section}: <span style={{ color: '#ffffff' }}>{tooltip.val.toFixed(2)}{uiSettings.showPercentage ? '%' : ''}</span>
+            {tooltip.section}: <span style={{ color: '#ffffff' }}>{formatValue(tooltip.val, routes.find(r => r.name === tooltip.routeName))}</span>
           </div>
         </div>
       )}
