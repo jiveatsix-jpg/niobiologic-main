@@ -13,7 +13,7 @@ const TUTORIAL_STEPS = [
     title: "PANEL DE CONTROL",
     subtitle: "SISTEMA IZQUIERDO",
     icon: <Settings className="w-12 h-12 text-[#ff0055] mb-4" />,
-    content: "En la barra lateral izquierda encontrarás todos los controles agrupados: el selector de modo de vista, los accesos a los paneles (STREAMS, SECTORS, DATA MATRIX, IDENTITY, OPTICS, TELEMETRY) y las acciones de datos. Abre un panel desde la sección PANELS para modificar la interfaz, gestionar las Rutas (datos) y configurar las Secciones (ejes del radar). Prueba a añadir diferentes colores y ajustar la intensidad de brillo."
+    content: "En la barra lateral izquierda encontrarás todos los controles agrupados: arriba, el selector de vista (Evolución, Comparación, Distribución, Radar y Tabla) para cambiar cómo se dibujan tus datos; debajo, los accesos a los paneles (STREAMS, SECTORS, DATA MATRIX, IDENTITY, OPTICS, TELEMETRY) y las acciones de datos. Abre un panel desde la sección PANELS para modificar la interfaz, gestionar las Rutas (datos) y configurar las Secciones (ejes del radar). Prueba a añadir diferentes colores y ajustar la intensidad de brillo."
   },
   {
     title: "IMPORTAR DATOS",
