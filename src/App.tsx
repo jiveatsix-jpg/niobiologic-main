@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { AeterProvider, useAeterContext } from './context/AeterContext';
-import { FloatingPanel } from './components/FloatingPanel';
+import { PanelDock } from './components/PanelDock';
 import { GraphCanvas } from './components/GraphCanvas';
 import { DataTableView } from './components/DataTableView';
 import { BioMonitorOverlay } from './components/BioMonitorOverlay';
@@ -36,19 +36,15 @@ const CONTENT_MAP: Record<PanelId, React.FC> = {
 const AppContent = () => {
   const { uiSettings, appMode, viewMode, setShowTutorial, isPrinting, setShowLibrary } = useAeterContext();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [openPanels, setOpenPanels] = useState<Set<PanelId>>(new Set());
+  const [activePanel, setActivePanel] = useState<PanelId | null>(null);
   const [showFrame, setShowFrame] = useState(true);
   const [infoModeOn, setInfoModeOn] = useState(() => localStorage.getItem('niobiologic_infoMode') === 'true');
   useEffect(() => {
     localStorage.setItem('niobiologic_infoMode', String(infoModeOn));
   }, [infoModeOn]);
 
-  const togglePanel = (id: PanelId) => {
-    setOpenPanels(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  const selectPanel = (id: PanelId) => {
+    setActivePanel(prev => prev === id ? null : id);
   };
 
   if (!appMode) return <ModeSelector />;
@@ -103,10 +99,21 @@ const AppContent = () => {
         {/* SIDEBAR — consolidated controls */}
         <Sidebar
           panels={PANELS}
-          openPanels={openPanels}
-          onTogglePanel={togglePanel}
+          activePanel={activePanel}
+          onSelectPanel={selectPanel}
           containerRef={containerRef}
         />
+
+        {/* DOCKED TAB CONTENT — replaces the active tab's floating panel */}
+        {activePanel && (() => {
+          const p = PANELS.find(pp => pp.id === activePanel)!;
+          const Content = CONTENT_MAP[p.id];
+          return (
+            <PanelDock title={p.label} icon={p.icon} color={p.color} onClose={() => setActivePanel(null)}>
+              <Content />
+            </PanelDock>
+          );
+        })()}
 
         {/* CANVAS — full area (export box unchanged) */}
         <main className="flex-1 flex items-center justify-center p-6 overflow-hidden relative">
@@ -115,18 +122,6 @@ const AppContent = () => {
               {viewMode === 'DATATABLE' ? <DataTableView /> : <GraphCanvas />}
             </div>
           </div>
-
-          {/* FLOATING PANELS */}
-          {PANELS.map(p => {
-            const Content = CONTENT_MAP[p.id];
-            return (
-              <FloatingPanel key={p.id} id={p.id} title={p.label} icon={p.icon} color={p.color}
-                isOpen={openPanels.has(p.id)} onToggle={() => togglePanel(p.id)} side={p.id === 'streams' || p.id === 'sectors' || p.id === 'matrix' ? 'left' : 'right'} width={280}
-              >
-                <Content />
-              </FloatingPanel>
-            );
-          })}
         </main>
       </div>
 

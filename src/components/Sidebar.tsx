@@ -23,8 +23,8 @@ const VIEW_MODES: { id: ViewMode; label: string; info: string }[] = [
 
 interface SidebarProps {
   panels: SidebarPanel[];
-  openPanels: Set<PanelId>;
-  onTogglePanel: (id: PanelId) => void;
+  activePanel: PanelId | null;
+  onSelectPanel: (id: PanelId) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -53,7 +53,7 @@ const ActionButton: React.FC<{
   </button>
 );
 
-export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePanel, containerRef }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectPanel, containerRef }) => {
   const { exportData, importData, importCSV, setShowBioMonitor, viewMode, setViewMode } = useAeterContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
@@ -125,12 +125,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
           <SectionLabel>Panels</SectionLabel>
           <div className="flex flex-col gap-1">
             {panels.map(p => {
-              const isOpen = openPanels.has(p.id);
+              const isOpen = activePanel === p.id;
               return (
                 <button
                   key={p.id}
-                  onClick={() => onTogglePanel(p.id)}
-                  title={`${isOpen ? 'Cierra' : 'Abre'} el panel ${p.label}.`}
+                  onClick={() => onSelectPanel(p.id)}
+                  title={`${isOpen ? 'Cierra' : 'Abre'} la pestaña ${p.label}.`}
                   className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md border transition-all text-left active:scale-[0.98] ${
                     isOpen
                       ? 'bg-white/[0.04]'
