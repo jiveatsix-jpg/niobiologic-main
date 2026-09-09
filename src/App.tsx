@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { AeterProvider, useAeterContext } from './context/AeterContext';
 import { FloatingPanel } from './components/FloatingPanel';
 import { GraphCanvas } from './components/GraphCanvas';
 import { DataTableView } from './components/DataTableView';
 import { BioMonitorOverlay } from './components/BioMonitorOverlay';
 import { TutorialOverlay } from './components/TutorialOverlay';
+import { InfoTooltip } from './components/InfoTooltip';
 import { ModeSelector } from './components/ModeSelector';
 import { Sidebar, PanelId as SidebarPanelId, SidebarPanel } from './components/Sidebar';
 import { Database, Zap, Grid3X3, Type, Palette, Activity, HelpCircle, Square, BookOpen } from 'lucide-react';
@@ -37,6 +38,10 @@ const AppContent = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [openPanels, setOpenPanels] = useState<Set<PanelId>>(new Set());
   const [showFrame, setShowFrame] = useState(true);
+  const [infoModeOn, setInfoModeOn] = useState(() => localStorage.getItem('niobiologic_infoMode') === 'true');
+  useEffect(() => {
+    localStorage.setItem('niobiologic_infoMode', String(infoModeOn));
+  }, [infoModeOn]);
 
   const togglePanel = (id: PanelId) => {
     setOpenPanels(prev => {
@@ -81,8 +86,18 @@ const AppContent = () => {
           >
             <BookOpen className="w-3.5 h-3.5" />
           </button>
+          <button
+            onClick={() => setInfoModeOn(v => !v)}
+            className={`p-2 rounded-md border transition-all ${infoModeOn ? 'text-[#00ffcc] border-[#00ffcc]/40 bg-[#00ffcc]/5' : 'text-[#6e7681] border-white/10 hover:border-white/25'}`}
+            title="Activar/desactivar cuadros de información al pasar el mouse"
+            aria-pressed={infoModeOn}
+          >
+            <span className="w-3.5 h-3.5 flex items-center justify-center text-[10px] font-bold">i</span>
+          </button>
         </div>
       </header>
+
+      <InfoTooltip active={infoModeOn} />
 
       <div className="flex-1 flex overflow-hidden">
         {/* SIDEBAR — consolidated controls */}

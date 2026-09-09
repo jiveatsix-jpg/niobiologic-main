@@ -13,12 +13,12 @@ export interface SidebarPanel {
   color: string;
 }
 
-const VIEW_MODES: { id: ViewMode; label: string }[] = [
-  { id: 'EVOLUTION', label: 'EVO' },
-  { id: 'COMPARISON', label: 'COMP' },
-  { id: 'DISTRIBUTION', label: 'DIST' },
-  { id: 'RADAR', label: 'RDR' },
-  { id: 'DATATABLE', label: 'TBL' },
+const VIEW_MODES: { id: ViewMode; label: string; info: string }[] = [
+  { id: 'EVOLUTION', label: 'EVO', info: 'Evolución: muestra cómo cambian los valores a lo largo del tiempo, como líneas.' },
+  { id: 'COMPARISON', label: 'COMP', info: 'Comparación: muestra los valores lado a lado, como barras.' },
+  { id: 'DISTRIBUTION', label: 'DIST', info: 'Distribución: muestra qué proporción representa cada valor sobre el total.' },
+  { id: 'RADAR', label: 'RDR', info: 'Radar: compara varias variables a la vez en un gráfico circular.' },
+  { id: 'DATATABLE', label: 'TBL', info: 'Tabla: muestra los datos en filas y columnas, sin gráfico.' },
 ];
 
 interface SidebarProps {
@@ -41,9 +41,11 @@ const ActionButton: React.FC<{
   tone?: string;
   onClick: () => void;
   className?: string;
-}> = ({ label, icon, tone = 'text-[#8b949e]', onClick, className = '' }) => (
+  title?: string;
+}> = ({ label, icon, tone = 'text-[#8b949e]', onClick, className = '', title }) => (
   <button
     onClick={onClick}
+    title={title}
     className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#00ffcc]/30 active:scale-[0.98] transition-all text-left ${tone} ${className}`}
   >
     <span className="shrink-0">{icon}</span>
@@ -105,7 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
               <button
                 key={mode.id}
                 onClick={() => setViewMode(mode.id)}
-                title={mode.id}
+                title={mode.info}
                 className={`py-1.5 text-[9px] font-bold tracking-wider rounded transition-all ${
                   viewMode === mode.id
                     ? 'bg-[#00ffcc] text-[#0a0a12]'
@@ -128,6 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
                 <button
                   key={p.id}
                   onClick={() => onTogglePanel(p.id)}
+                  title={`${isOpen ? 'Cierra' : 'Abre'} el panel ${p.label}.`}
                   className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md border transition-all text-left active:scale-[0.98] ${
                     isOpen
                       ? 'bg-white/[0.04]'
@@ -157,6 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
               label="Import JSON"
               icon={<FolderUp className="w-3.5 h-3.5 text-[#ffd700]" />}
               onClick={() => fileInputRef.current?.click()}
+              title="Carga un set de datos guardado previamente como archivo JSON."
             />
             <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleImport} />
 
@@ -164,6 +168,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
               label="Import CSV"
               icon={<FolderUp className="w-3.5 h-3.5 text-[#00ffcc]" />}
               onClick={() => csvInputRef.current?.click()}
+              title="Carga datos desde un archivo CSV."
             />
             <input type="file" accept=".csv" className="hidden" ref={csvInputRef} onChange={handleCSVImport} />
 
@@ -171,6 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
               label="Export"
               icon={<FolderDown className="w-3.5 h-3.5 text-[#00ffcc]" />}
               onClick={exportData}
+              title="Descarga los datos actuales como archivo JSON."
             />
 
             <ActionButton
@@ -178,6 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
               icon={<Download className="w-3.5 h-3.5 text-[#e6edf3]" />}
               onClick={handleDownload}
               className="capture-overlay-ui"
+              title="Guarda una captura del área de gráficos como imagen PNG."
             />
 
             <ActionButton
@@ -185,6 +192,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, openPanels, onTogglePa
               icon={<Activity className="w-3.5 h-3.5 text-[#00ffcc]" />}
               onClick={() => setShowBioMonitor(true)}
               className="capture-overlay-ui"
+              title="Abre el panel de monitoreo en vivo de las métricas."
             />
           </div>
         </div>
