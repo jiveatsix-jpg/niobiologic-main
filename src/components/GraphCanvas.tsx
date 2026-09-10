@@ -40,6 +40,16 @@ export const GraphCanvas = React.memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
 
+  // Canvas text is measured/drawn with whatever font is available at draw time — it doesn't
+  // repaint on its own once a web font (Google Fonts, loaded via @import) finishes downloading,
+  // so the first paint can fall back to a system font until something else triggers a redraw.
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    document.fonts.ready.then(() => { if (!cancelled) setFontsReady(true); });
+    return () => { cancelled = true; };
+  }, []);
+
   const { routes, sections } = useMemo(() => {
     const visibleIdxs = rawSections.map((_, i) => i).filter(i => !rawSections[i].hidden);
     const visibleSections = visibleIdxs.map(i => rawSections[i]);
@@ -904,7 +914,7 @@ export const GraphCanvas = React.memo(() => {
       drawGraphContent(ctx);
       drawCRTOverlay(ctx);
     }
-  }, [routes, sections, viewMode, currentSectionIndex, uiSettings, drawEvolutionMode, drawComparisonMode, drawDistributionMode, tooltip]);
+  }, [routes, sections, viewMode, currentSectionIndex, uiSettings, drawEvolutionMode, drawComparisonMode, drawDistributionMode, tooltip, fontsReady]);
 
   // Window Resize listener - recalculates dimensions natively but keeps logic structure intact
   const [, setWinSize] = useState({ w: window.innerWidth, h: window.innerHeight });
