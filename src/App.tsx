@@ -13,6 +13,7 @@ import { Database, Zap, Grid3X3, Type, Palette, Activity, HelpCircle, Square, Bo
 import { StreamsContent, SectorsContent, MatrixContent, IdentityContent, OpticsContent, TelemetryContent } from './components/PanelContents';
 import { PrintOverlay } from './components/PrintOverlay';
 import { LibraryOverlay } from './components/LibraryOverlay';
+import { GifStudioOverlay } from './components/GifStudioOverlay';
 
 type PanelId = SidebarPanelId;
 
@@ -134,6 +135,7 @@ const AppContent = () => {
       <TutorialOverlay />
       <PrintOverlay isVisible={isPrinting} />
       <LibraryOverlay />
+      <GifStudioOverlay containerRef={containerRef} />
     </div>
   );
 };

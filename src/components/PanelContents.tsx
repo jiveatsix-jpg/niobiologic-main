@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Plus, Trash2, Settings2, ChevronLeft, ChevronRight, Database, Target, Image as ImageIcon, X } from 'lucide-react';
+import { Plus, Trash2, Settings2, ChevronLeft, ChevronRight, Database, Target, Image as ImageIcon, X, Eye, EyeOff } from 'lucide-react';
 import { useAeterContext } from '../context/AeterContext';
 import { useState } from 'react';
 
@@ -18,10 +18,11 @@ export const StreamsContent: React.FC = () => {
         <span className="text-[11px] font-bold text-[#8a8a8a] uppercase tracking-widest">SHOW RESOURCES</span>
       </label>
       {routes.map(route => (
-        <div key={route.id} className="bg-[#0a0a12] border border-[#4a4a4a]/40">
+        <div key={route.id} className={`bg-[#0a0a12] border border-[#4a4a4a]/40 ${route.hidden ? 'opacity-40' : ''}`}>
           <div className="flex items-center gap-1.5 p-1.5">
             <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: route.color, boxShadow: `0 0 6px ${route.color}` }} />
             <input type="text" value={route.name} onChange={e => updateRoute(route.id, { name: e.target.value.toUpperCase() })} className="bg-transparent border-none text-[#ffffff] font-bold text-[13px] focus:outline-none min-w-0 flex-1 tracking-wider" />
+            <button onClick={() => updateRoute(route.id, { hidden: !route.hidden })} title={route.hidden ? 'Muestra esta línea en el gráfico' : 'Oculta esta línea del gráfico (útil para armar capturas de un GIF paso a paso)'} className={`p-0.5 shrink-0 ${route.hidden ? 'text-[#4a4a4a]' : 'text-[#00ffcc]'}`}>{route.hidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button>
             <button onClick={() => setExpanded(expanded === route.id ? null : route.id)} title={expanded === route.id ? 'Cierra los ajustes de color y recurso de esta línea' : 'Abre los ajustes de color y recurso de esta línea'} className={`p-0.5 shrink-0 ${expanded === route.id ? 'text-[#00ffcc]' : 'text-[#4a4a4a]'}`}><Settings2 className="w-3.5 h-3.5" /></button>
             <button onClick={() => removeRoute(route.id)} title="Elimina esta línea y todos sus valores" className="p-0.5 text-[#ff0055]/40 hover:text-[#ff0055] shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
           </div>
@@ -64,11 +65,12 @@ export const SectorsContent: React.FC = () => {
         </div>
       )}
       {sections.map((sec, i) => (
-        <div key={`sec-${i}`} className={`bg-[#0a0a12] border transition-all ${isActive(i) ? 'border-[#00ffcc]/60 bg-[#00ffcc]/5' : 'border-[#4a4a4a]/40'}`}>
+        <div key={`sec-${i}`} className={`bg-[#0a0a12] border transition-all ${isActive(i) ? 'border-[#00ffcc]/60 bg-[#00ffcc]/5' : 'border-[#4a4a4a]/40'} ${sec.hidden ? 'opacity-40' : ''}`}>
           <div className="flex items-center gap-1.5 p-1.5">
             <input type="color" value={sec.color} onChange={e => updateSection(i, { color: e.target.value })} className="w-4 h-4 p-0 bg-transparent border-none cursor-pointer shrink-0" />
             <input type="text" value={sec.color} onChange={e => updateSection(i, { color: e.target.value })} className="w-12 bg-transparent border-none text-[#ffffff] font-mono text-[11px] focus:outline-none uppercase" />
             <input type="text" value={sec.name} onChange={e => updateSection(i, { name: e.target.value })} className="bg-transparent border-none text-[#00ffcc] font-bold text-[13px] focus:outline-none min-w-0 flex-1 tracking-wider" />
+            <button onClick={() => updateSection(i, { hidden: !sec.hidden })} title={sec.hidden ? 'Muestra esta categoría en el gráfico' : 'Oculta esta categoría del gráfico (útil para armar capturas de un GIF paso a paso)'} className={`p-0.5 shrink-0 ${sec.hidden ? 'text-[#4a4a4a]' : 'text-[#00ffcc]'}`}>{sec.hidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button>
             {(viewMode === 'COMPARISON' || viewMode === 'DISTRIBUTION') && <button onClick={() => setCurrentSectionIndex(i)} title="Marca esta categoría como la activa en la vista actual" className={`p-0.5 shrink-0 ${isActive(i) ? 'text-[#00ffcc]' : 'text-[#4a4a4a]'}`}><Target className="w-3 h-3" /></button>}
             <button onClick={() => setExpanded(expanded === i ? null : i)} title={expanded === i ? 'Cierra los ajustes de anclaje y brillo de esta categoría' : 'Abre los ajustes de anclaje y brillo de esta categoría'} className={`p-0.5 shrink-0 ${expanded === i ? 'text-[#00ffcc]' : 'text-[#4a4a4a]'}`}><Settings2 className="w-3.5 h-3.5" /></button>
             <button onClick={() => removeSection(i)} title="Elimina esta categoría del eje X en todas las líneas" className="p-0.5 text-[#ff0055]/40 hover:text-[#ff0055] shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>

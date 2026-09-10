@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RouteData, Section, UISettings, ViewMode, TooltipInfo, AppMode, SavedGraph, GraphDoc } from '../types';
+import { RouteData, Section, UISettings, ViewMode, TooltipInfo, AppMode, SavedGraph, GraphDoc, GifFrame } from '../types';
 import { parseCSV } from '../utils/csv';
 
 const INITIAL_SECTIONS: Section[] = [
@@ -133,6 +133,18 @@ export function useAeterData() {
     return saved ? JSON.parse(saved) : [];
   });
   const [showLibrary, setShowLibrary] = useState(false);
+
+  // GIF Studio — capture the graph area as a frame, tweak each one's duration, export as a GIF.
+  const [gifFrames, setGifFrames] = useState<GifFrame[]>([]);
+  const [showGifStudio, setShowGifStudio] = useState(false);
+  const [gifDefaultDuration, setGifDefaultDuration] = useState(500);
+
+  const addGifFrame = (dataUrl: string, duration?: number) => {
+    setGifFrames(prev => [...prev, { id: newDocId(), dataUrl, duration: duration ?? gifDefaultDuration }]);
+  };
+  const removeGifFrame = (id: string) => setGifFrames(prev => prev.filter(f => f.id !== id));
+  const updateGifFrameDuration = (id: string, duration: number) => setGifFrames(prev => prev.map(f => f.id === id ? { ...f, duration } : f));
+  const clearGifFrames = () => setGifFrames([]);
 
   // Persistence
   useEffect(() => {
@@ -361,5 +373,7 @@ export function useAeterData() {
     savedGraphs, saveGraph, loadGraph, deleteGraph,
     showLibrary, setShowLibrary,
     docs, activeDocId, addTab, closeTab, switchDoc, renameDoc,
+    gifFrames, addGifFrame, removeGifFrame, updateGifFrameDuration, clearGifFrames,
+    showGifStudio, setShowGifStudio, gifDefaultDuration, setGifDefaultDuration,
   };
 }

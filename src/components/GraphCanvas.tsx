@@ -41,14 +41,18 @@ export const GraphCanvas = React.memo(() => {
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
 
   const { routes, sections } = useMemo(() => {
-    if (rawSections.length <= LTTB_THRESHOLD) return { routes: rawRoutes, sections: rawSections };
-    const reference = rawSections.map((_, i) =>
-      rawRoutes.reduce((sum, r) => sum + (r.data[i] || 0), 0)
+    const visibleIdxs = rawSections.map((_, i) => i).filter(i => !rawSections[i].hidden);
+    const visibleSections = visibleIdxs.map(i => rawSections[i]);
+    const visibleRoutes = rawRoutes.filter(r => !r.hidden).map(r => ({ ...r, data: visibleIdxs.map(i => r.data[i]) }));
+
+    if (visibleSections.length <= LTTB_THRESHOLD) return { routes: visibleRoutes, sections: visibleSections };
+    const reference = visibleSections.map((_, i) =>
+      visibleRoutes.reduce((sum, r) => sum + (r.data[i] || 0), 0)
     );
     const idxs = lttbIndices(reference, LTTB_THRESHOLD);
     return {
-      sections: idxs.map(i => rawSections[i]),
-      routes: rawRoutes.map(r => ({ ...r, data: idxs.map(i => r.data[i] ?? 0) })),
+      sections: idxs.map(i => visibleSections[i]),
+      routes: visibleRoutes.map(r => ({ ...r, data: idxs.map(i => r.data[i] ?? 0) })),
     };
   }, [rawRoutes, rawSections]);
 
@@ -59,10 +63,12 @@ export const GraphCanvas = React.memo(() => {
   const scaledFont = (px: number) => `${Math.max(6, Math.round(px * ELEMENT_SCALE))}px`;
 
   const { minVal, maxVal } = useMemo(() => {
-    const allDataPoints = routes.flatMap(r => r.data);
+    // Uses every route's data, hidden or not, so hiding a line/category to build a GIF
+    // doesn't rescale the axis — the frames stay visually comparable across the sequence.
+    const allDataPoints = rawRoutes.flatMap(r => r.data);
     const dataMin = allDataPoints.length > 0 ? Math.min(...allDataPoints) : 0;
     const dataMax = allDataPoints.length > 0 ? Math.max(...allDataPoints) : 100;
-    
+
     if (uiSettings.scaleMode === 'FIXED') {
       return { minVal: 0, maxVal: 100 };
     }
@@ -71,7 +77,7 @@ export const GraphCanvas = React.memo(() => {
       minVal: 0,
       maxVal: dataMax
     };
-  }, [routes, uiSettings.scaleMode]);
+  }, [rawRoutes, uiSettings.scaleMode]);
 
   const signalStr = "98.4%"; // Statically placed for CRT overlay to avoid continuous context updates causing re-renders
 
@@ -145,7 +151,7 @@ export const GraphCanvas = React.memo(() => {
     ctx.stroke();
 
     if (uiSettings.scaleMode === 'DATA_ONLY') {
-      const uniqueVals = Array.from(new Set(routes.flatMap(r => r.data)))
+      const uniqueVals = Array.from(new Set(rawRoutes.flatMap(r => r.data)))
         .filter((v): v is number => typeof v === 'number')
         .sort((a, b) => a - b);
       
@@ -425,7 +431,7 @@ export const GraphCanvas = React.memo(() => {
     ctx.restore();
 
     drawLegend(ctx);
-  }, [uiSettings, minVal, maxVal, sections, routes, getX, getY, drawLegend, tooltip, viewMode]);
+  }, [uiSettings, minVal, maxVal, sections, routes, rawRoutes, getX, getY, drawLegend, tooltip, viewMode]);
 
   const drawComparisonMode = useCallback((ctx: CanvasRenderingContext2D) => {
     const barWidth = 17;

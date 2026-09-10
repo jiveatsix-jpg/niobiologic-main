@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAeterContext } from '../context/AeterContext';
 import { formatValue } from '../utils/format';
 
 export const RadialAllocationMap: React.FC = () => {
-  const { sections, routes, uiSettings } = useAeterContext();
+  const { sections: rawSections, routes: rawRoutes, uiSettings } = useAeterContext();
+  const { sections, routes } = useMemo(() => {
+    const visibleIdxs = rawSections.map((_, i) => i).filter(i => !rawSections[i].hidden);
+    return {
+      sections: visibleIdxs.map(i => rawSections[i]),
+      routes: rawRoutes.filter(r => !r.hidden).map(r => ({ ...r, data: visibleIdxs.map(i => r.data[i]) })),
+    };
+  }, [rawRoutes, rawSections]);
   const size = 500;
   const center = size / 2;
   const innerRadius = 80;

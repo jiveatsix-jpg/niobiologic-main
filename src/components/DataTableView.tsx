@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAeterContext } from '../context/AeterContext';
 import { formatValue } from '../utils/format';
 
 export const DataTableView: React.FC = () => {
-  const { routes, sections, uiSettings } = useAeterContext();
+  const { routes: rawRoutes, sections: rawSections, uiSettings } = useAeterContext();
+
+  const { routes, sections } = useMemo(() => {
+    const visibleIdxs = rawSections.map((_, i) => i).filter(i => !rawSections[i].hidden);
+    return {
+      sections: visibleIdxs.map(i => rawSections[i]),
+      routes: rawRoutes.filter(r => !r.hidden).map(r => ({ ...r, data: visibleIdxs.map(i => r.data[i]) })),
+    };
+  }, [rawRoutes, rawSections]);
 
   return (
     <div className="w-full h-full p-6 overflow-y-auto no-scrollbar text-[#00ffcc]" style={{ color: uiSettings.baseColor, fontFamily: '"Press Start 2P", cursive' }}>

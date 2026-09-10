@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Download, FolderDown, FolderUp, Activity, LayoutGrid } from 'lucide-react';
+import { Download, FolderDown, FolderUp, Activity, LayoutGrid, Clapperboard } from 'lucide-react';
 import { useAeterContext } from '../context/AeterContext';
 import { ViewMode } from '../types';
 import * as htmlToImage from 'html-to-image';
@@ -55,7 +55,7 @@ const ActionButton: React.FC<{
 );
 
 export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectPanel, containerRef }) => {
-  const { exportData, importData, importCSV, setShowBioMonitor, viewMode, setViewMode } = useAeterContext();
+  const { exportData, importData, importCSV, setShowBioMonitor, setShowGifStudio, viewMode, setViewMode } = useAeterContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
 
@@ -186,6 +186,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
               onClick={handleDownload}
               className="capture-overlay-ui"
               title="Guarda una captura del área de gráficos como imagen PNG."
+            />
+
+            <ActionButton
+              label="GIF Studio"
+              icon={<Clapperboard className="w-3.5 h-3.5 text-[#ff8800]" />}
+              onClick={() => setShowGifStudio(true)}
+              className="capture-overlay-ui"
+              title="Abre el estudio de GIF: capturá el gráfico como fotograma después de cada cambio de valores, y exportalo como un GIF animado."
             />
 
             <ActionButton

@@ -6,6 +6,7 @@ export interface RouteData {
   resourceValue: number;
   unitSymbol?: string;
   unitPosition?: 'prefix' | 'suffix';
+  hidden?: boolean;
 }
 
 export interface Section {
@@ -15,6 +16,7 @@ export interface Section {
   glowIntensity: number;
   isAnchored?: boolean;
   isMinimalShadow?: boolean;
+  hidden?: boolean;
 }
 
 export interface TooltipInfo {
@@ -67,6 +69,13 @@ export interface SavedGraph {
   uiSettings: UISettings;
   appMode: AppMode | null;
   viewMode: ViewMode;
+}
+
+// A single captured snapshot of the graph area, used to build a GIF.
+export interface GifFrame {
+  id: string;
+  dataUrl: string;
+  duration: number; // ms this frame stays on screen when played back
 }
 
 // One open graph "tab" — its own sections/routes/uiSettings/view, editable independently of any other open tab.
