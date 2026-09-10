@@ -11,6 +11,7 @@ export interface SidebarPanel {
   label: string;
   icon: React.ReactNode;
   color: string;
+  description?: string;
 }
 
 const VIEW_MODES: { id: ViewMode; label: string; info: string }[] = [
@@ -30,7 +31,7 @@ interface SidebarProps {
 
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex items-center gap-2 px-1">
-    <span className="text-[9px] font-bold tracking-[0.25em] text-[#6e7681] uppercase">{children}</span>
+    <span className="text-[11px] font-bold tracking-[0.25em] text-[#6e7681] uppercase">{children}</span>
     <div className="flex-1 h-px bg-white/5" />
   </div>
 );
@@ -49,7 +50,7 @@ const ActionButton: React.FC<{
     className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#00ffcc]/30 active:scale-[0.98] transition-all text-left ${tone} ${className}`}
   >
     <span className="shrink-0">{icon}</span>
-    <span className="text-[10px] font-semibold tracking-wider uppercase">{label}</span>
+    <span className="text-[12px] font-semibold tracking-wider uppercase">{label}</span>
   </button>
 );
 
@@ -108,7 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
                 key={mode.id}
                 onClick={() => setViewMode(mode.id)}
                 title={mode.info}
-                className={`py-1.5 text-[9px] font-bold tracking-wider rounded transition-all ${
+                className={`py-1.5 text-[11px] font-bold tracking-wider rounded transition-all ${
                   viewMode === mode.id
                     ? 'bg-[#00ffcc] text-[#0a0a12]'
                     : 'text-[#6e7681] hover:text-[#e6edf3] hover:bg-white/5'
@@ -130,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
                 <button
                   key={p.id}
                   onClick={() => onSelectPanel(p.id)}
-                  title={`${isOpen ? 'Cierra' : 'Abre'} la pestaña ${p.label}.`}
+                  title={`${isOpen ? 'Cierra' : 'Abre'} ${p.label}${p.description ? `: ${p.description}` : '.'}`}
                   className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md border transition-all text-left active:scale-[0.98] ${
                     isOpen
                       ? 'bg-white/[0.04]'
@@ -140,12 +141,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
                 >
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color, boxShadow: isOpen ? `0 0 8px ${p.color}` : 'none' }} />
                   <span
-                    className="text-[10px] font-semibold tracking-wider uppercase truncate"
+                    className="text-[12px] font-semibold tracking-wider uppercase truncate"
                     style={{ color: isOpen ? p.color : '#8b949e' }}
                   >
                     {p.label}
                   </span>
-                  <span className={`ml-auto text-[9px] ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ color: p.color }}>●</span>
+                  <span className={`ml-auto text-[11px] ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ color: p.color }}>●</span>
                 </button>
               );
             })}
@@ -160,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
               label="Import JSON"
               icon={<FolderUp className="w-3.5 h-3.5 text-[#ffd700]" />}
               onClick={() => fileInputRef.current?.click()}
-              title="Carga un set de datos guardado previamente como archivo JSON."
+              title="Reemplaza las líneas, categorías y ajustes visuales de la pestaña activa por los de un archivo .json exportado previamente con EXPORT."
             />
             <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleImport} />
 
@@ -168,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
               label="Import CSV"
               icon={<FolderUp className="w-3.5 h-3.5 text-[#00ffcc]" />}
               onClick={() => csvInputRef.current?.click()}
-              title="Carga datos desde un archivo CSV."
+              title="Reemplaza las categorías y líneas de la pestaña activa por las de un archivo .csv (columnas = categorías, filas = líneas)."
             />
             <input type="file" accept=".csv" className="hidden" ref={csvInputRef} onChange={handleCSVImport} />
 
@@ -200,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
         <div className="pt-2 border-t border-white/5 px-1">
           <div className="flex items-center gap-1.5 text-[#6e7681]">
             <LayoutGrid className="w-3 h-3" />
-            <span className="text-[9px] font-mono tracking-wider">NIOBIOLOGIC_v3.0</span>
+            <span className="text-[11px] font-mono tracking-wider">NIOBIOLOGIC_v3.0</span>
           </div>
         </div>
       </div>

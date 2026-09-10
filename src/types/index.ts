@@ -50,6 +50,8 @@ export interface UISettings {
   graphTitleGlow?: string;
   visualFilter: 'NONE' | 'CRT' | 'PRINT' | 'STEALTH' | 'VINTAGE' | 'MONOCHROME';
   showSectionLabels: boolean;
+  showAreaTexture?: boolean;
+  showPointValues?: boolean;
 }
 
 export type ViewMode = 'EVOLUTION' | 'COMPARISON' | 'DISTRIBUTION' | 'RADAR' | 'DATATABLE';
@@ -65,4 +67,15 @@ export interface SavedGraph {
   uiSettings: UISettings;
   appMode: AppMode | null;
   viewMode: ViewMode;
+}
+
+// One open graph "tab" — its own sections/routes/uiSettings/view, editable independently of any other open tab.
+export interface GraphDoc {
+  id: string;
+  name: string;
+  sections: Section[];
+  routes: RouteData[];
+  uiSettings: UISettings;
+  viewMode: ViewMode;
+  currentSectionIndex: number;
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RouteData, Section, UISettings, ViewMode, TooltipInfo, AppMode, SavedGraph } from '../types';
+import { RouteData, Section, UISettings, ViewMode, TooltipInfo, AppMode, SavedGraph, GraphDoc } from '../types';
 import { parseCSV } from '../utils/csv';
 
 const INITIAL_SECTIONS: Section[] = [
@@ -38,27 +38,74 @@ const INITIAL_UI_SETTINGS: UISettings = {
   graphTitleColor: '#ffffff',
   graphTitleGlow: '#00ffcc',
   visualFilter: 'NONE',
-  showSectionLabels: true
+  showSectionLabels: true,
+  showAreaTexture: false,
+  showPointValues: false
 };
 
+const newDocId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+const createDefaultDoc = (name: string): GraphDoc => ({
+  id: newDocId(),
+  name,
+  sections: JSON.parse(JSON.stringify(INITIAL_SECTIONS)),
+  routes: JSON.parse(JSON.stringify(INITIAL_ROUTES)),
+  uiSettings: JSON.parse(JSON.stringify(INITIAL_UI_SETTINGS)),
+  viewMode: 'EVOLUTION',
+  currentSectionIndex: 0,
+});
+
+function loadInitialDocs(): GraphDoc[] {
+  const saved = localStorage.getItem('aeter_docs');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch {
+      // fall through to legacy migration / defaults
+    }
+  }
+
+  // Migrate the pre-tabs single-graph storage into a single doc, so existing work isn't lost.
+  const legacySections = localStorage.getItem('aeter_sections');
+  const legacyRoutes = localStorage.getItem('aeter_routes');
+  const legacyUi = localStorage.getItem('aeter_uisettings');
+  if (legacySections || legacyRoutes || legacyUi) {
+    return [{
+      id: newDocId(),
+      name: 'GRAPH 1',
+      sections: legacySections ? JSON.parse(legacySections) : INITIAL_SECTIONS,
+      routes: legacyRoutes ? JSON.parse(legacyRoutes) : INITIAL_ROUTES,
+      uiSettings: legacyUi ? { ...INITIAL_UI_SETTINGS, ...JSON.parse(legacyUi) } : INITIAL_UI_SETTINGS,
+      viewMode: 'EVOLUTION',
+      currentSectionIndex: 0,
+    }];
+  }
+
+  return [createDefaultDoc('GRAPH 1')];
+}
+
 export function useAeterData() {
-  const [sections, setSections] = useState<Section[]>(() => {
-    const saved = localStorage.getItem('aeter_sections');
-    return saved ? JSON.parse(saved) : INITIAL_SECTIONS;
-  });
+  const [docs, setDocs] = useState<GraphDoc[]>(loadInitialDocs);
+  const [activeDocId, setActiveDocId] = useState<string>(() => docs[0].id);
 
-  const [routes, setRoutes] = useState<RouteData[]>(() => {
-    const saved = localStorage.getItem('aeter_routes');
-    return saved ? JSON.parse(saved) : INITIAL_ROUTES;
-  });
+  const activeDoc = docs.find(d => d.id === activeDocId) ?? docs[0];
+  const { sections, routes, uiSettings, viewMode, currentSectionIndex } = activeDoc;
 
-  const [uiSettings, setUiSettings] = useState<UISettings>(() => {
-    const saved = localStorage.getItem('aeter_uisettings');
-    return saved ? { ...INITIAL_UI_SETTINGS, ...JSON.parse(saved) } : INITIAL_UI_SETTINGS;
-  });
+  // Applies an update to whichever doc is active right now — using the functional setDocs
+  // form so several calls in the same tick (e.g. a spreadsheet-style paste) all land instead
+  // of each one clobbering the last based on a stale `docs` snapshot.
+  const updateActiveDoc = (updater: (doc: GraphDoc) => GraphDoc) => {
+    setDocs(prev => prev.map(d => d.id === activeDocId ? updater(d) : d));
+  };
 
-  const [viewMode, setViewMode] = useState<ViewMode>('EVOLUTION');
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const setSections = (next: Section[]) => updateActiveDoc(d => ({ ...d, sections: next }));
+  const setRoutes = (next: RouteData[] | ((prev: RouteData[]) => RouteData[])) =>
+    updateActiveDoc(d => ({ ...d, routes: typeof next === 'function' ? (next as (prev: RouteData[]) => RouteData[])(d.routes) : next }));
+  const setUiSettings = (next: UISettings) => updateActiveDoc(d => ({ ...d, uiSettings: next }));
+  const setViewMode = (next: ViewMode) => updateActiveDoc(d => ({ ...d, viewMode: next }));
+  const setCurrentSectionIndex = (next: number) => updateActiveDoc(d => ({ ...d, currentSectionIndex: next }));
+
   const [showBioMonitor, setShowBioMonitor] = useState(false);
   const [showResources, setShowResources] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -89,16 +136,8 @@ export function useAeterData() {
 
   // Persistence
   useEffect(() => {
-    localStorage.setItem('aeter_sections', JSON.stringify(sections));
-  }, [sections]);
-
-  useEffect(() => {
-    localStorage.setItem('aeter_routes', JSON.stringify(routes));
-  }, [routes]);
-
-  useEffect(() => {
-    localStorage.setItem('aeter_uisettings', JSON.stringify(uiSettings));
-  }, [uiSettings]);
+    localStorage.setItem('aeter_docs', JSON.stringify(docs));
+  }, [docs]);
 
   useEffect(() => {
     if (appMode) localStorage.setItem('aeter_app_mode', appMode);
@@ -107,6 +146,39 @@ export function useAeterData() {
   useEffect(() => {
     localStorage.setItem('aeter_library', JSON.stringify(savedGraphs));
   }, [savedGraphs]);
+
+  // Tabs — several graphs open at once, each with its own live-editable state
+  const addTab = () => {
+    const doc = createDefaultDoc(`GRAPH ${docs.length + 1}`);
+    setDocs(prev => [...prev, doc]);
+    setActiveDocId(doc.id);
+  };
+
+  const closeTab = (id: string) => {
+    setDocs(prev => {
+      const idx = prev.findIndex(d => d.id === id);
+      if (idx === -1) return prev;
+      const next = prev.filter(d => d.id !== id);
+      if (next.length === 0) {
+        const fresh = createDefaultDoc('GRAPH 1');
+        setActiveDocId(fresh.id);
+        return [fresh];
+      }
+      if (id === activeDocId) {
+        const neighbor = next[Math.max(0, idx - 1)];
+        setActiveDocId(neighbor.id);
+      }
+      return next;
+    });
+  };
+
+  const switchDoc = (id: string) => {
+    if (docs.some(d => d.id === id)) setActiveDocId(id);
+  };
+
+  const renameDoc = (id: string, name: string) => {
+    setDocs(prev => prev.map(d => d.id === id ? { ...d, name: name.toUpperCase() || d.name } : d));
+  };
 
   const saveGraph = (name: string) => {
     const graph: SavedGraph = {
@@ -122,13 +194,21 @@ export function useAeterData() {
     setSavedGraphs(prev => [graph, ...prev]);
   };
 
+  // Loading a library entry opens it as a new tab, alongside whatever is already open.
   const loadGraph = (id: string) => {
     const graph = savedGraphs.find(g => g.id === id);
     if (!graph) return;
-    setSections(graph.sections);
-    setRoutes(graph.routes);
-    setUiSettings(graph.uiSettings);
-    setViewMode(graph.viewMode);
+    const doc: GraphDoc = {
+      id: newDocId(),
+      name: graph.name,
+      sections: JSON.parse(JSON.stringify(graph.sections)),
+      routes: JSON.parse(JSON.stringify(graph.routes)),
+      uiSettings: JSON.parse(JSON.stringify(graph.uiSettings)),
+      viewMode: graph.viewMode,
+      currentSectionIndex: 0,
+    };
+    setDocs(prev => [...prev, doc]);
+    setActiveDocId(doc.id);
     setAppMode('GRAPH');
   };
 
@@ -161,7 +241,7 @@ export function useAeterData() {
   };
 
   const updateDataPoint = (routeId: string, pointIndex: number, val: number) => {
-    setRoutes(routes.map(r => {
+    setRoutes(prev => prev.map(r => {
       if (r.id === routeId) {
         const newData = [...r.data];
         newData[pointIndex] = val;
@@ -196,9 +276,9 @@ export function useAeterData() {
   const updateSection = (index: number, updates: Partial<Section>) => {
     const newSections = [...sections];
     let updatedSec = { ...newSections[index], ...updates };
-    
+
     if (updates.name) updatedSec.name = updates.name.toUpperCase();
-    
+
     if (updatedSec.isAnchored) {
       if (updates.color !== undefined) {
         updatedSec.shadowColor = updates.color;
@@ -208,7 +288,7 @@ export function useAeterData() {
         updatedSec.shadowColor = updatedSec.color;
       }
     }
-    
+
     newSections[index] = updatedSec;
     setSections(newSections);
   };
@@ -280,5 +360,6 @@ export function useAeterData() {
     appMode, setAppMode,
     savedGraphs, saveGraph, loadGraph, deleteGraph,
     showLibrary, setShowLibrary,
+    docs, activeDocId, addTab, closeTab, switchDoc, renameDoc,
   };
 }

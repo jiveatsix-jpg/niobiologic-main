@@ -6,6 +6,35 @@ import { formatValue } from '../utils/format';
 
 const LTTB_THRESHOLD = 150;
 
+function drawHexagon(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number) {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 180) * (60 * i - 30);
+    const px = cx + size * Math.cos(angle);
+    const py = cy + size * Math.sin(angle);
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.stroke();
+}
+
+// Fills the current clip region with a hex-mesh circuit texture, tinted to the route's color.
+function drawAreaHexTexture(ctx: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number, color: string) {
+  const size = 9;
+  const w = size * Math.sqrt(3);
+  const vertOffset = size * 1.5;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.35;
+  let row = 0;
+  for (let y = y0 - size; y < y1 + size; y += vertOffset, row++) {
+    const xOffset = row % 2 === 0 ? 0 : w / 2;
+    for (let x = x0 - size + xOffset; x < x1 + size; x += w) {
+      drawHexagon(ctx, x, y, size);
+    }
+  }
+}
+
 export const GraphCanvas = React.memo(() => {
   const { routes: rawRoutes, sections: rawSections, currentSectionIndex, setCurrentSectionIndex, viewMode, uiSettings } = useAeterContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -182,6 +211,10 @@ export const GraphCanvas = React.memo(() => {
       });
       ctx.closePath();
       ctx.fill();
+      if (uiSettings.showAreaTexture) {
+        ctx.clip();
+        drawAreaHexTexture(ctx, PADDING, PADDING - 18, CANVAS_WIDTH - PADDING / 2, CANVAS_HEIGHT - PADDING, pathColor);
+      }
       ctx.restore();
 
       // 2. Draw Glow Layer (Outer glow)
@@ -253,8 +286,20 @@ export const GraphCanvas = React.memo(() => {
         ctx.beginPath();
         ctx.arc(x, y, 7, 0, Math.PI * 2);
         ctx.stroke();
-        
+
         ctx.restore();
+
+        if (uiSettings.showPointValues) {
+          ctx.save();
+          ctx.fillStyle = pathColor;
+          ctx.font = `bold ${scaledFont(uiSettings.fontSize - 4)} ${uiSettings.fontFamily}`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = pathColor;
+          ctx.fillText(formatValue(val, route), x, y - 10);
+          ctx.restore();
+        }
       });
     });
 
