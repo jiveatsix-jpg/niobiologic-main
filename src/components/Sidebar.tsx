@@ -102,8 +102,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
       <div className="flex flex-col gap-5 p-3">
         {/* VIEW MODES */}
         <div className="space-y-2">
-          <SectionLabel>View</SectionLabel>
-          <div className="grid grid-cols-5 gap-1 p-1 rounded-md border border-white/10 bg-black/30">
+          <div className="flex items-center gap-2 px-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00ffcc] shrink-0" style={{ boxShadow: '0 0 6px #00ffcc' }} />
+            <span className="text-[11px] font-bold tracking-[0.25em] text-[#00ffcc] uppercase">View</span>
+            <div className="flex-1 h-px bg-[#00ffcc]/15" />
+          </div>
+          <div className="grid grid-cols-5 gap-1 p-1 rounded-md border border-[#00ffcc]/30 bg-[#00ffcc]/[0.04] shadow-[0_0_16px_rgba(0,255,204,0.12)]">
             {VIEW_MODES.map(mode => (
               <button
                 key={mode.id}
@@ -111,8 +115,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ panels, activePanel, onSelectP
                 title={mode.info}
                 className={`py-1.5 text-[11px] font-bold tracking-wider rounded transition-all ${
                   viewMode === mode.id
-                    ? 'bg-[#00ffcc] text-[#0a0a12]'
-                    : 'text-[#6e7681] hover:text-[#e6edf3] hover:bg-white/5'
+                    ? 'bg-[#00ff66]/15 text-[#00ff66] border border-[#00ff66]/50'
+                    : 'text-[#ff0055]/70 border border-transparent hover:text-[#ff0055] hover:bg-[#ff0055]/10'
                 }`}
               >
                 {mode.label}

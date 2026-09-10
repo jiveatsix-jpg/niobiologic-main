@@ -27,7 +27,7 @@ const INITIAL_UI_SETTINGS: UISettings = {
   backgroundPattern: 'STANDARD',
   xAxisTitle: 'TIME / SECTOR',
   yAxisTitle: 'MAGNITUDE / VALUE',
-  showCompYAxis: false,
+  showCompYAxis: true,
   telemetryTopRightLabel: 'DATA_CONFIDENCE',
   telemetryTopRightValue: 'LOCAL_STORAGE',
   showTelemetryTopRight: true,
